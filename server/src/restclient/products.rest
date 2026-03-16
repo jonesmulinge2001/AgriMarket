@@ -1,0 +1,38 @@
+
+@BASE_URL = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NzAwNjhkMy05ODI4LTQwOGEtYjBjMy1mNGFhOTVhNGRiODYiLCJlbWFpbCI6ImpvbmF0aGFubXdhbmRpQGdtYWlsLmNvbSIsInJvbGUiOiJGQVJNRVIiLCJpYXQiOjE3NzM2MTQzNjAsImV4cCI6MTc3MzcwMDc2MH0.gZhzpmfwnwH_dm-B0qgUTToOhQe9UEA5CtxOJkbvI9o
+@BASE_URL2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NzAwNjhkMy05ODI4LTQwOGEtYjBjMy1mNGFhOTVhNGRiODYiLCJlbWFpbCI6ImpvbmF0aGFubXdhbmRpQGdtYWlsLmNvbSIsInJvbGUiOiJGQVJNRVIiLCJpYXQiOjE3NzMwNzUyMDgsImV4cCI6MTc3MzE2MTYwOH0.mqEM7iz6DZq8AKpk4Y5sEe4VTDcrNktbu9MC-VmMEQ8
+### Create Product (POST /products)
+POST http://localhost:3000/products
+Content-Type: application/json
+Authorization: Bearer {{BASE_URL2}}
+
+{
+  "name": "Sample Product",
+  "description": "This is a sample product",
+  "quantity": 10,
+  "price": 1500,
+  "imageUrl": "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1671234567/academeet/posts/images/abcd1234.jpg"
+}
+
+
+### Get All Products (GET /products)
+GET http://localhost:3000/products
+Authorization: Bearer {{BASE_URL}}
+
+### Get Single Product (GET /products/:id)
+GET http://localhost:3000/products/cmmjf1e490001tu58pnfbrzru
+Authorization: Bearer {{BASE_URL}}
+
+
+### Update Product (PATCH /products/:id)
+PATCH http://localhost:3000/products/cmmjf1e490001tu58pnfbrzru
+Authorization: Bearer {{BASE_URL}}
+Content-Type: application/json
+
+{
+  "price": 2000,
+  "imageUrl": "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1671234567/academeet/posts/images/xyz9876.jpg"
+}
+
+### Delete Product (DELETE /products/:id)
+DELETE http://localhost:3000/products/c9f8b4e3-1234-5678-9101-abcdef123456

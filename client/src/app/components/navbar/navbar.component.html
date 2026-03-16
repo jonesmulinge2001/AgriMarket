@@ -1,0 +1,155 @@
+<!-- Main Navbar template -->
+<div
+  class="fixed top-0 left-0 right-0 z-55 bg-white shadow-sm px-4 py-3 h-16 flex items-center justify-between"
+>
+  <!-- Logo -->
+  <div class="flex items-center space-x-2">
+    <img
+      routerLink="/"
+      src="farm.png"
+      alt=""
+      class="h-8 w-32 object-cover cursor-pointer"
+    />
+  </div>
+
+  <!-- Engagement Icons -->
+  <div class="flex items-center space-x-4">
+    <!-- Cart Icon - Always visible -->
+    <button
+      (click)="navigateToCart()"
+      class="relative p-2 text-gray-600 hover:text-green-600 transition-colors"
+      [class.text-green-600]="router.url === '/cart'"
+    >
+      <span class="material-icons text-2xl">shopping_cart</span>
+
+      <!-- Cart Badge -->
+      <span
+        *ngIf="cartItemCount > 0"
+        class="absolute -top-1 -right-1 bg-gradient-to-r from-green-400 to-blue-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center shadow-lg animate-pulse"
+      >
+        {{ cartItemCount > 99 ? "99+" : cartItemCount }}
+      </span>
+    </button>
+
+    <!-- Mobile Search Button -->
+    <button
+      (click)="toggleSearchPanel()"
+      class="material-icons text-gray-500 text-2xl cursor-pointer sm:hidden"
+    >
+      search
+    </button>
+
+    <!-- Profile Dropdown (only when logged in) -->
+    <div *ngIf="isLoggedIn" class="relative profile-dropdown-container">
+      <button
+        (click)="toggleMenu()"
+        class="flex items-center space-x-2 focus:outline-none"
+      >
+        <div
+          class="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white font-semibold"
+        >
+          <!-- You can add user image or initial here -->
+          U
+        </div>
+      </button>
+
+      <!-- Dropdown Menu -->
+      <div
+        *ngIf="menuOpen"
+        class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border"
+      >
+        <button
+          (click)="viewProfile()"
+          class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center"
+        >
+          <span class="material-icons text-sm mr-2">person</span>
+          My Profile
+        </button>
+
+        <button
+          (click)="navigateToCart()"
+          class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
+        >
+          <div class="flex items-center">
+            <span class="material-icons text-sm mr-2">shopping_cart</span>
+            My Cart
+          </div>
+          <span
+            *ngIf="cartItemCount > 0"
+            class="bg-green-500 text-white text-xs rounded-full px-2 py-1"
+          >
+            {{ cartItemCount }}
+          </span>
+        </button>
+
+        <!-- Add this to your profile dropdown menu in navbar -->
+        <button
+          (click)="viewOrders()"
+          class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center"
+        >
+          <span class="material-icons text-sm mr-2">receipt</span>
+          My Orders
+        </button>
+
+        <button
+          (click)="openLogoutModal()"
+          class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 flex items-center"
+        >
+          <span class="material-icons text-sm mr-2">logout</span>
+          Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Login Button (when not logged in) -->
+    <button
+      *ngIf="!isLoggedIn"
+      routerLink="/login"
+      class="px-4 py-2 bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-full text-sm font-semibold hover:from-blue-500 hover:to-green-400 transition"
+    >
+      Login
+    </button>
+  </div>
+</div>
+
+<!-- Logout Confirmation Modal -->
+<div
+  *ngIf="logoutModalOpen"
+  class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-70"
+  (click)="logoutModalOpen = false"
+>
+  <div
+    class="bg-white rounded-2xl shadow-2xl p-6 w-80 max-w-sm relative"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header -->
+    <div class="flex items-center mb-4">
+      <span class="material-icons text-red-500 mr-2 text-2xl">logout</span>
+      <h3 class="text-lg font-bold text-gray-900">Confirm Logout</h3>
+    </div>
+
+    <!-- Body -->
+    <p class="text-gray-600 mb-6">
+      Are you sure you want to log out? Your session will be ended immediately.
+    </p>
+
+    <!-- Actions -->
+    <div class="flex justify-end space-x-3">
+      <button
+        (click)="logoutModalOpen = false"
+        class="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition-all duration-300"
+      >
+        <span class="material-icons text-gray-500 text-base">cancel</span>
+        Cancel
+      </button>
+
+      <button
+        (click)="logOut()"
+        class="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 shadow-lg transition-all duration-300"
+      >
+        <span class="material-icons text-white text-base">logout</span>
+        Logout
+      </button>
+    </div>
+  </div>
+</div>

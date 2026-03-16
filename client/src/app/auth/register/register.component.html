@@ -1,0 +1,147 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4 relative overflow-hidden">
+    <div class="w-full max-w-md backdrop-blur-md bg-white/30 p-10 rounded-3xl shadow-2xl border border-white/20 relative z-10">
+      <!-- Header -->
+      <div class="flex flex-col items-center mb-6">
+        <div class="bg-gradient-to-r from-green-400 to-blue-500 rounded-full w-14 h-14 flex items-center justify-center text-white text-3xl font-bold animate-bounce">
+          <span class="material-icons">add</span>
+        </div>
+        <h2 class="text-3xl font-bold mt-4 text-gray-800 text-center">Sign Up For Free</h2>
+        <p class="text-sm text-gray-600 text-center mt-2">Sign up in 1 minute for free!</p>
+      </div>
+  
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <!-- Full Name -->
+        <div class="mb-4 relative">
+          <label class="block text-sm font-medium mb-1">Full Name</label>
+          <span class="material-icons absolute left-3 top-8 text-gray-400">person</span>
+          <input
+            type="text"
+            formControlName="name"
+            placeholder="Enter your name..."
+            class="w-full pl-10 px-4 py-3 rounded-full border border-white/30 bg-white/40 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition placeholder-gray-500"
+            [ngClass]="{ 'border-red-500': isInvalid('name'), 'border-white/30': !isInvalid('name') }"
+          />
+          <div *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.invalid" class="text-red-500 text-sm mt-1">
+            Please provide your name
+          </div>
+        </div>
+  
+        <!-- Email -->
+        <div class="mb-4 relative">
+          <label class="block text-sm font-medium mb-1">Email Address</label>
+          <span class="material-icons absolute left-3 top-8 text-gray-400">email</span>
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="Enter your email..."
+            class="w-full pl-10 px-4 py-3 rounded-full border border-white/30 bg-white/40 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition placeholder-gray-500"
+            [ngClass]="{ 'border-red-500': isInvalid('email'), 'border-white/30': !isInvalid('email') }"
+          />
+          <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" class="text-red-500 text-sm mt-1">
+            Enter a valid email
+          </div>
+        </div>
+  
+        <!-- Phone Number -->
+        <div class="mb-4 relative">
+          <label class="block text-sm font-medium mb-1">Phone Number</label>
+          <span class="material-icons absolute left-3 top-8 text-gray-400">phone</span>
+          <input
+            type="text"
+            formControlName="phone"
+            placeholder="+254..."
+            class="w-full pl-10 px-4 py-3 rounded-full border border-white/30 bg-white/40 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition placeholder-gray-500"
+            [ngClass]="{ 'border-red-500': isInvalid('phone'), 'border-white/30': !isInvalid('phone') }"
+          />
+          <div *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid" class="text-red-500 text-sm mt-1">
+            <ng-container *ngIf="registerForm.get('phone')?.errors?.['required']">
+              Phone number is required.
+            </ng-container>
+            <ng-container *ngIf="registerForm.get('phone')?.errors?.['pattern']">
+              Please enter a valid Kenyan phone number (e.g. 0712345678 or +254712345678).
+            </ng-container>
+          </div>
+        </div>
+  
+        <!-- Password -->
+        <div class="mb-4 relative">
+          <label class="block text-sm font-medium mb-1">Password</label>
+          <span class="material-icons absolute left-3 top-8 text-gray-400">lock</span>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Enter your password"
+            class="w-full pl-10 px-4 py-3 rounded-full border border-white/30 bg-white/40 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition placeholder-gray-500"
+            [ngClass]="{ 'border-red-500': isInvalid('password'), 'border-white/30': !isInvalid('password') }"
+          />
+          <span class="absolute right-4 top-3 cursor-pointer text-gray-500" (click)="toggleVisibility()">
+            <span class="material-icons">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+          </span>
+          <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="text-red-500 text-sm mt-1">
+            Enter a correct password
+          </div>
+        </div>
+  
+        <!-- Role Selection Dropdown -->
+        <div class="mb-6 relative">
+          <label class="block text-sm font-medium mb-1">Select Role</label>
+          <div class="relative">
+            <span class="material-icons absolute left-3 top-3.5 text-gray-400 z-10">
+              {{ getSelectedRoleIcon() }}
+            </span>
+            <select
+              formControlName="role"
+              class="w-full pl-10 pr-10 px-4 py-3 rounded-full border border-white/30 bg-white/40 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition appearance-none cursor-pointer text-gray-700"
+              [ngClass]="{ 'border-red-500': isInvalid('role'), 'border-white/30': !isInvalid('role') }"
+            >
+              <option value="" disabled class="bg-white/90">-- Select your role --</option>
+              <option *ngFor="let role of roles" [value]="role.value" class="bg-white/90">
+                {{ role.label }}
+              </option>
+            </select>
+            <span class="material-icons absolute right-3 top-3.5 text-gray-400 pointer-events-none">
+              arrow_drop_down
+            </span>
+          </div>
+          
+          <!-- Role descriptions -->
+          <div class="mt-2 text-xs text-gray-600 flex flex-wrap gap-2">
+            <span *ngFor="let role of roles" class="inline-flex items-center px-2 py-1 rounded-full bg-white/40 backdrop-blur-sm">
+              <span class="material-icons text-xs mr-1">{{ role.icon }}</span>
+              {{ role.label }}
+            </span>
+          </div>
+  
+          <div *ngIf="registerForm.get('role')?.touched && registerForm.get('role')?.invalid" class="text-red-500 text-sm mt-1">
+            Please select a role
+          </div>
+        </div>
+  
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          class="w-full bg-gradient-to-r from-green-400 to-blue-500 hover:from-blue-500 hover:to-green-400 text-white py-3 rounded-full font-semibold shadow-lg transition transform hover:scale-105 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          [disabled]="registerForm.invalid"
+        >
+          <span>Sign Up as {{ getSelectedRoleLabel() }}</span>
+          <span class="material-icons">arrow_forward</span>
+        </button>
+      </form>
+  
+      <p class="text-sm text-center mt-4 text-gray-700">
+        Already have an account?
+        <a routerLink="/login" class="text-green-500 font-semibold cursor-pointer hover:underline">Sign In</a>
+      </p>
+    </div>
+  </div>
+  
+  <!-- Add this style block for custom animations -->
+  <style>
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .animate-bounce {
+      animation: bounce 2s infinite;
+    }
+  </style>

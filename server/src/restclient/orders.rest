@@ -1,0 +1,35 @@
+@TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NzAwNjhkMy05ODI4LTQwOGEtYjBjMy1mNGFhOTVhNGRiODYiLCJlbWFpbCI6ImpvbmF0aGFubXdhbmRpQGdtYWlsLmNvbSIsInJvbGUiOiJGQVJNRVIiLCJpYXQiOjE3NzM2MTQzNjAsImV4cCI6MTc3MzcwMDc2MH0.gZhzpmfwnwH_dm-B0qgUTToOhQe9UEA5CtxOJkbvI9o
+@PRODUCT_ID = cmmjf1e490001tu58pnfbrzru
+@ORDER_ID = b067cc32-4073-412a-af9f-58e6407a78c1
+### Create Order
+POST http://localhost:3000/orders
+Authorization: Bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+  "productId": "{{PRODUCT_ID}}",
+  "quantity": 2
+}
+
+### get all my orders
+GET http://localhost:3000/orders
+Authorization: Bearer {{TOKEN}}
+
+### get by id
+GET http://localhost:3000/orders/{{ORDER_ID}}
+Authorization: Bearer {{TOKEN}}
+
+### update order
+PATCH http://localhost:3000/orders/order-id-here
+Authorization: Bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+  "status": "SHIPPED",
+  "quantity": 3
+}
+
+
+### delete order
+DELETE http://localhost:3000/orders/order-id-here
+Authorization: Bearer <token>

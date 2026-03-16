@@ -1,0 +1,264 @@
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex flex-col items-center justify-center min-h-screen">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-500"></div>
+      <p class="mt-4 text-gray-600">Loading product details...</p>
+    </div>
+  
+<!-- Error State - Update this section -->
+<div *ngIf="!loading && error" class="flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-xl max-w-lg text-center">
+      <span class="material-icons text-5xl text-red-500 mb-4">error</span>
+      <h3 class="text-xl font-semibold mb-2">Oops! Something went wrong</h3>
+      <p class="mb-4">{{ error }}</p>
+      <div class="flex space-x-4 justify-center">
+        <button 
+          (click)="goBack()"
+          class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+        >
+          Go Back
+        </button>
+        <button 
+          *ngIf="productId" 
+          (click)="loadProductDetails(productId)"
+          class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+        >
+          Try Again
+        </button>
+      </div>
+    </div>
+  </div>
+  
+    <!-- Product Detail Content -->
+    <div *ngIf="!loading && !error && product" class="container mx-auto px-4 py-8">
+      <!-- Back Button -->
+      <button 
+        (click)="goBack()"
+        class="mb-6 flex items-center text-gray-600 hover:text-gray-900 transition group"
+      >
+        <span class="material-icons mr-1 group-hover:-translate-x-1 transition-transform">arrow_back</span>
+        Back to Products
+      </button>
+  
+      <!-- Main Product Section -->
+      <div class="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden border border-white/50 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 lg:p-8">
+          <!-- Product Images -->
+          <div class="space-y-4">
+            <div class="relative h-96 rounded-2xl overflow-hidden bg-gray-100 border border-gray-200">
+              <img 
+                [src]="getImageUrl(product.imageUrl)" 
+                [alt]="product.name"
+                class="w-full h-full object-cover"
+                (error)="handleImageError($event)"
+              >
+              
+              <!-- Stock Status Badge -->
+              <div class="absolute top-4 right-4">
+                <span 
+                  class="px-4 py-2 rounded-full text-sm font-semibold shadow-lg"
+                  [ngClass]="getStockStatus().class"
+                >
+                  {{ getStockStatus().text }}
+                </span>
+              </div>
+  
+              <!-- Quantity Available Badge -->
+              <div class="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
+                {{ product.quantity }} units available
+              </div>
+            </div>
+  
+            <!-- Thumbnail Gallery (if multiple images, you can extend this) -->
+            <div class="grid grid-cols-4 gap-2">
+              <div class="h-20 rounded-lg overflow-hidden border-2 border-green-500 cursor-pointer">
+                <img 
+                  [src]="getImageUrl(product.imageUrl)" 
+                  [alt]="product.name"
+                  class="w-full h-full object-cover"
+                  (error)="handleImageError($event)"
+                >
+              </div>
+              <!-- Add more thumbnails if you have multiple images -->
+            </div>
+          </div>
+  
+          <!-- Product Info -->
+          <div class="space-y-6">
+            <!-- Header -->
+            <div>
+              <div class="flex justify-between items-start">
+                <h1 class="text-3xl font-bold text-gray-800">{{ product.name }}</h1>
+                <span class="text-sm text-gray-500">Added {{ formatDate(product.createdAt) }}</span>
+              </div>
+              
+              <!-- Category Badge -->
+              <div class="mt-2">
+                <span class="inline-block px-4 py-1 bg-gradient-to-r from-green-100 to-blue-100 text-green-800 rounded-full text-sm">
+                  {{ product.category || 'Uncategorized' }}
+                </span>
+              </div>
+            </div>
+  
+            <!-- Farmer Info -->
+            <div class="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-xl">
+              <h3 class="text-sm font-medium text-gray-500 mb-2">Sold by</h3>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-lg font-bold">
+                    {{ product.farmer.name.charAt(0) }}
+                  </div>
+                  <div class="ml-3">
+                    <p class="font-semibold text-gray-800">{{ product.farmer.name }}</p>
+                    <p class="text-sm text-gray-500">{{ product.farmer.email }}</p>
+                  </div>
+                </div>
+                <button 
+                  (click)="contactFarmer()"
+                  class="px-4 py-2 bg-white text-green-600 rounded-full border border-green-300 hover:bg-green-50 transition flex items-center"
+                >
+                  <span class="material-icons text-sm mr-1">chat</span>
+                  Contact Farmer
+                </button>
+              </div>
+            </div>
+  
+            <!-- Description -->
+            <div>
+              <h3 class="text-lg font-semibold text-gray-800 mb-2">Description</h3>
+              <p class="text-gray-600 leading-relaxed">{{ product.description }}</p>
+            </div>
+  
+            <!-- Price and Stock -->
+            <div class="border-t border-b border-gray-200 py-4">
+              <div class="flex justify-between items-center mb-4">
+                <span class="text-lg text-gray-600">Price</span>
+                <span class="text-4xl font-bold text-green-600">{{ formatPrice(product.price) }}</span>
+              </div>
+              
+              <!-- Stock Level Bar -->
+              <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Stock Level</span>
+                  <span class="font-medium">{{ product.quantity }} units</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    class="h-2 rounded-full transition-all duration-500"
+                    [ngClass]="getStockLevelClass()"
+                    [style.width.%]="(product.quantity / 100) * 100 > 100 ? 100 : (product.quantity / 100) * 100"
+                  ></div>
+                </div>
+              </div>
+            </div>
+  
+            <!-- Quantity Selector and Add to Cart -->
+            <div class="space-y-4">
+              <div *ngIf="product.quantity > 0" class="flex items-center space-x-4">
+                <span class="text-gray-700">Quantity:</span>
+                <div class="flex items-center border rounded-full overflow-hidden">
+                  <button 
+                    (click)="decrementQuantity()"
+                    [disabled]="quantity <= 1"
+                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span class="material-icons text-sm">remove</span>
+                  </button>
+                  <span class="px-6 py-2 text-center min-w-[60px]">{{ quantity }}</span>
+                  <button 
+                    (click)="incrementQuantity()"
+                    [disabled]="quantity >= product.quantity"
+                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span class="material-icons text-sm">add</span>
+                  </button>
+                </div>
+                <span class="text-sm text-gray-500">(Max {{ product.quantity }})</span>
+              </div>
+  
+              <!-- Action Buttons -->
+              <div class="flex flex-col sm:flex-row gap-3">
+                <button 
+                  *ngIf="product.quantity > 0"
+                  (click)="addToCart()"
+                  class="flex-1 bg-gradient-to-r from-green-400 to-blue-500 hover:from-blue-500 hover:to-green-400 text-white py-4 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 flex items-center justify-center space-x-2"
+                >
+                  <span class="material-icons">shopping_cart</span>
+                  <span>Add to Cart - {{ formatPrice(product.price * quantity) }}</span>
+                </button>
+  
+                <button 
+                  *ngIf="product.quantity === 0"
+                  disabled
+                  class="flex-1 bg-gray-300 text-gray-500 py-4 rounded-xl font-semibold cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  <span class="material-icons">block</span>
+                  <span>Out of Stock</span>
+                </button>
+  
+                <button 
+                  (click)="contactFarmer()"
+                  class="px-6 py-4 bg-white border-2 border-green-500 text-green-600 rounded-xl font-semibold hover:bg-green-50 transition flex items-center justify-center space-x-2"
+                >
+                  <span class="material-icons">message</span>
+                  <span class="hidden sm:inline">Message Farmer</span>
+                </button>
+              </div>
+  
+              <!-- Login Prompt for Guests -->
+              <div *ngIf="!isLoggedIn()" class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                <p class="text-yellow-800 text-sm flex items-center">
+                  <span class="material-icons text-yellow-600 mr-2">info</span>
+                  Please <a routerLink="/login" [queryParams]="{returnUrl: '/product/' + product.id}" class="font-semibold underline mx-1">login</a> to add items to cart or contact the farmer.
+                </p>
+              </div>
+            </div>
+  
+            <!-- Product Highlights -->
+            <div class="grid grid-cols-2 gap-3 pt-4">
+              <div class="flex items-center text-sm text-gray-600">
+                <span class="material-icons text-green-500 mr-2">verified</span>
+                Verified Farmer
+              </div>
+              <div class="flex items-center text-sm text-gray-600">
+                <span class="material-icons text-green-500 mr-2">local_shipping</span>
+                Free Delivery*
+              </div>
+              <div class="flex items-center text-sm text-gray-600">
+                <span class="material-icons text-green-500 mr-2">payment</span>
+                Secure Payment
+              </div>
+              <div class="flex items-center text-sm text-gray-600">
+                <span class="material-icons text-green-500 mr-2">refresh</span>
+                7-Day Returns
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Related Products Section -->
+      <div *ngIf="relatedProducts.length > 0" class="mt-12">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Related Products</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div *ngFor="let related of relatedProducts" class="group cursor-pointer" [routerLink]="['/product', related.id]">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <div class="relative h-40 overflow-hidden">
+                <img 
+                  [src]="getImageUrl(related.imageUrl)" 
+                  [alt]="related.name"
+                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  (error)="handleImageError($event)"
+                >
+              </div>
+              <div class="p-4">
+                <h3 class="font-semibold text-gray-800 mb-1 line-clamp-1">{{ related.name }}</h3>
+                <p class="text-green-600 font-bold">{{ formatPrice(related.price) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
