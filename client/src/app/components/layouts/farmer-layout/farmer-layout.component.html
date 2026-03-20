@@ -1,1 +1,33 @@
-<p>farmer-layout works!</p>
+<div
+  [ngClass]="isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'"
+  class="min-h-screen flex"
+>
+
+  <!-- Sidebar -->
+  <app-side-bar
+    [isCollapsed]="isCollapsed"
+    [isDarkMode]="isDarkMode"
+  ></app-side-bar>
+
+  <!-- Main Content -->
+  <div
+    class="flex-1 flex flex-col transition-all duration-300"
+    [ngStyle]="{ 'margin-left.px': isCollapsed ? 64 : 256 }"
+  >
+
+    <!-- Topbar -->
+    <app-top-bar
+      [isDarkMode]="isDarkMode"
+      [sidebarCollapsed]="isCollapsed"
+      (sidebarToggle)="toggleSidebar()"
+      (darkModeToggle)="toggleDarkMode()"
+    ></app-top-bar>
+
+    <!-- Farmer Pages -->
+    <main class="flex-1 p-6 mt-16">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>

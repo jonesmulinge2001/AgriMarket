@@ -9,6 +9,13 @@ import { FormsModule } from '@angular/forms';
 import { isPlatformBrowser } from '@angular/common'; 
 import { CartService } from '../../service/cart.service';
 
+interface Language {
+  code: string;
+  name: string;
+  flag: string;
+  direction: 'ltr' | 'rtl';
+}
+
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -23,6 +30,7 @@ import { CartService } from '../../service/cart.service';
 export class NavbarComponent implements OnInit, OnDestroy {
   isLoggedIn: boolean = false;
   userName: string = '';
+  userEmail: string = '';
   userImage: string = '';
   menuOpen: boolean = false;
   unreadCount: number = 0;
@@ -31,7 +39,20 @@ export class NavbarComponent implements OnInit, OnDestroy {
   loading: boolean = false;
   searchPanelOpen: boolean = false;
   cartItemCount: number = 0;
-  currentUrl: string = ''; // Add this to track current URL
+  currentUrl: string = '';
+  
+  // Dark Mode
+  isDarkMode: boolean = false;
+  
+  // Language
+  currentLanguage: Language = { code: 'en', name: 'English', flag: '🇺🇸', direction: 'ltr' };
+  languages: Language[] = [
+    { code: 'en', name: 'English', flag: '🇺🇸', direction: 'ltr' },
+    { code: 'sw', name: 'Kiswahili', flag: '🇰🇪', direction: 'ltr' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷', direction: 'ltr' },
+    { code: 'ar', name: 'العربية', flag: '🇸🇦', direction: 'rtl' }
+  ];
+  languageMenuOpen: boolean = false;
 
   window = window;
   
@@ -43,19 +64,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
   settingsPanelOpen: boolean = false;
   recentPanelOpen: boolean = false;
 
-  // Add computed properties
   totalUnreadMessages: number = 0;
   
-  // Chat modal properties
   activeConversationId: string | null = null;
   chatModalOpen: boolean = false;
 
   @Output() chatOpened = new EventEmitter<void>();
   @Output() chatClosed = new EventEmitter<void>();
+  @Output() darkModeToggled = new EventEmitter<boolean>();
+  @Output() languageChanged = new EventEmitter<Language>();
 
-  // Make router public or create a getter
   constructor(
-    public router: Router, // Change from private to public
+    public router: Router,
     private authService: AuthService,
     private toastr: ToastrService,
     private cartService: CartService,
@@ -65,16 +85,20 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.window = window;
+      this.loadThemePreferences();
     }
+    
     this.isLoggedIn = this.authService.isLoggedIn();
     
-    // Track current URL
+    if (this.isLoggedIn) {
+      this.loadUserData();
+    }
+    
     this.currentUrl = this.router.url;
     this.router.events.subscribe(() => {
       this.currentUrl = this.router.url;
     });
     
-    // Subscribe to cart count changes
     if (this.isLoggedIn) {
       this.cartSub = this.cartService.getCartCount().subscribe(count => {
         this.cartItemCount = count;
@@ -91,7 +115,89 @@ export class NavbarComponent implements OnInit, OnDestroy {
     document.removeEventListener('click', this.closeMenuOnOutsideClick.bind(this));
   }
 
-  // Add a method to check if current route is cart
+  private loadThemePreferences(): void {
+    // Load dark mode preference
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode) {
+      this.isDarkMode = JSON.parse(savedDarkMode);
+      this.applyDarkMode();
+    } else {
+      // Check system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      this.isDarkMode = prefersDark;
+      localStorage.setItem('darkMode', JSON.stringify(prefersDark));
+      this.applyDarkMode();
+    }
+
+    // Load language preference
+    const savedLanguage = localStorage.getItem('language');
+    if (savedLanguage) {
+      const lang = this.languages.find(l => l.code === savedLanguage);
+      if (lang) {
+        this.currentLanguage = lang;
+        this.applyLanguage();
+      }
+    }
+  }
+
+  private loadUserData(): void {
+    // Load user data from localStorage or service
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        this.userName = user.name || 'User';
+        this.userEmail = user.email || 'user@example.com';
+        this.userImage = user.image || '';
+      } catch {
+        this.userName = 'User';
+        this.userEmail = 'user@example.com';
+      }
+    }
+  }
+
+  toggleDarkMode(): void {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('darkMode', JSON.stringify(this.isDarkMode));
+    this.applyDarkMode();
+    this.darkModeToggled.emit(this.isDarkMode);
+    
+    // Show toast notification
+    this.toastr.success(
+      `${this.isDarkMode ? '🌙 Dark' : '☀️ Light'} mode activated`,
+      'Theme Changed',
+      { timeOut: 2000 }
+    );
+  }
+
+  private applyDarkMode(): void {
+    if (this.isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
+
+  changeLanguage(language: Language): void {
+    this.currentLanguage = language;
+    localStorage.setItem('language', language.code);
+    this.applyLanguage();
+    this.languageMenuOpen = false;
+    this.languageChanged.emit(language);
+    
+    // Show toast notification
+    this.toastr.success(
+      `Language changed to ${language.name}`,
+      '🌐 Language Updated',
+      { timeOut: 2000 }
+    );
+  }
+
+  private applyLanguage(): void {
+    document.documentElement.dir = this.currentLanguage.direction;
+    document.documentElement.lang = this.currentLanguage.code;
+  }
+
   isCartActive(): boolean {
     return this.router.url === '/cart';
   }
@@ -123,6 +229,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.menuOpen = !this.menuOpen;
   }
 
+  toggleLanguageMenu(): void {
+    this.languageMenuOpen = !this.languageMenuOpen;
+  }
+
   viewProfile(): void {
     this.menuOpen = false;
     this.router.navigate(['/my-profile']);
@@ -131,16 +241,19 @@ export class NavbarComponent implements OnInit, OnDestroy {
   closeMenuOnOutsideClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     
-    // Close search panel if clicking outside
     const isInsideSearch = target.closest('.search-container');
     if (!isInsideSearch) {
       this.searchPanelOpen = false;
     }
     
-    // Close menu if clicking outside
     const isInsideMenu = target.closest('.profile-dropdown-container');
     if (!isInsideMenu && this.menuOpen) {
       this.menuOpen = false;
+    }
+
+    const isInsideLanguageMenu = target.closest('.language-dropdown');
+    if (!isInsideLanguageMenu && this.languageMenuOpen) {
+      this.languageMenuOpen = false;
     }
   }
 
@@ -182,7 +295,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
     localStorage.removeItem('token');
     localStorage.removeItem('userid');
     localStorage.removeItem('role');
+    localStorage.removeItem('user');
     this.logoutModalOpen = false;
     this.router.navigate(['/login']);
+  }
+
+  getInitials(): string {
+    if (!this.userName) return 'U';
+    return this.userName.split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
   }
 }

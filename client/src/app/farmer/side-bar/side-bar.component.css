@@ -1,0 +1,89 @@
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  /* Custom Scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 20px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+  }
+  
+  .scrollbar-gray-200::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+  }
+  
+  .scrollbar-gray-700::-webkit-scrollbar-thumb {
+    background: #4a5568;
+  }
+  
+  /* Animations */
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  /* Glass Morphism Effects */
+  .backdrop-blur-md {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  
+  /* Hover Effects */
+  .hover\:scale-105:hover {
+    transform: scale(1.05);
+  }
+  
+  .group:hover .group-hover\:scale-110 {
+    transform: scale(1.1);
+  }
+  
+  /* Transitions */
+  .transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+  }
+  
+  /* Tooltip Styles */
+  .group:hover .group-hover\:opacity-100 {
+    opacity: 1;
+  }
+  
+  /* Active Tab Indicator Animation */
+  .absolute.left-0 {
+    transition: height 0.2s ease;
+  }

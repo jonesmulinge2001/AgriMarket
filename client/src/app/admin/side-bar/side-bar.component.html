@@ -1,102 +1,215 @@
-<div
-  class="fixed left-0 top-0 h-full z-30 transition-all duration-300"
-  [ngClass]="[
-    isCollapsed ? 'w-16' : 'w-64',
-    isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200',
-    'border-r'
-  ]"
+<!-- Super Admin Sidebar -->
+<aside
+  class="fixed left-0 top-0 h-full transition-all duration-300 shadow-2xl z-40 flex flex-col bg-gradient-to-b from-white to-gray-50 text-gray-800 border-r border-gray-200"
+  [ngClass]="isCollapsed ? 'w-20' : 'w-72'"
 >
-  <!-- Logo -->
-  <div
-    class="flex items-center justify-center h-16 border-b"
-    [ngClass]="isDarkMode ? 'border-gray-700' : 'border-gray-200'"
-  >
-    <div class="flex items-center space-x-2">
-      <span class="material-icons text-blue-600" style="font-size: 32px"
-        >school</span
-      >
-      <span
-        *ngIf="!isCollapsed"
-        class="text-xl font-bold"
-        [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'"
-      >
-        Academeet
-      </span>
+  <!-- Logo Section -->
+  <div class="relative overflow-hidden py-6 px-4">
+    <div class="absolute inset-0 bg-gradient-to-r from-green-400/10 to-blue-500/10"></div>
+    <div class="relative flex items-center gap-3">
+      <div class="bg-gradient-to-r from-green-400 to-blue-500 rounded-xl w-10 h-10 flex items-center justify-center text-white shadow-lg transform transition-transform hover:scale-105">
+        <span class="material-icons text-2xl">admin_panel_settings</span>
+      </div>
+      
+      <div *ngIf="!isCollapsed" class="overflow-hidden">
+        <h1 class="font-bold text-lg bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent whitespace-nowrap">
+          Admin Portal
+        </h1>
+        <p class="text-xs text-gray-500">System Administration</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Stats for Collapsed View -->
+  <div *ngIf="isCollapsed" class="px-2 mb-4">
+    <div class="space-y-2">
+      <div *ngFor="let stat of quickStats" class="relative group">
+        <div class="p-2 rounded-lg bg-gradient-to-r text-white text-center"
+             [ngClass]="stat.color">
+          <span class="material-icons text-lg">{{ stat.icon }}</span>
+        </div>
+        <!-- Tooltip -->
+        <div class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+          {{ stat.label }}: {{ stat.value() }}
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Navigation -->
-  <nav class="mt-6 px-3">
-    <ul class="space-y-1">
-      <li *ngFor="let item of menuItems">
-        <button
-          (click)="onSectionSelect(item)"
-          class="w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-300"
+  <nav class="flex-1 overflow-y-auto scrollbar-thin px-3 py-4">
+    <div class="space-y-1">
+      <!-- Menu Items -->
+      <div *ngFor="let item of menuItems" class="space-y-1">
+        <!-- Parent Menu Item -->
+        <div
+          (click)="item.children ? toggleMenu(item.id) : onSectionSelect(item)"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer group relative"
           [ngClass]="[
-            activeSection === item.id
-              ? 'bg-gradient-to-r from-[#3e7ff5] to-[#9234ea] text-white shadow-md'
-              : isDarkMode
-              ? 'text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-[#3e7ff5]/20 hover:to-[#9234ea]/20'
-              : 'text-gray-700 hover:text-gray-900 hover:bg-gradient-to-r hover:from-[#3e7ff5]/10 hover:to-[#9234ea]/10'
+            activeSection === item.id && !item.children
+              ? 'bg-gradient-to-r from-green-400 to-blue-500 text-white shadow-lg' 
+              : 'text-gray-600 hover:bg-gradient-to-r hover:from-green-50 hover:to-blue-50 hover:text-gray-900'
           ]"
         >
-          <span class="material-icons flex-shrink-0">{{ item.icon }}</span>
-          <span *ngIf="!isCollapsed" class="ml-3 truncate">{{
-            item.label
-          }}</span>
-        </button>
-      </li>
-    </ul>
+          <span class="material-icons text-xl transition-transform group-hover:scale-110">{{ item.icon }}</span>
+
+          <span *ngIf="!isCollapsed" class="flex-1 text-sm font-medium">{{ item.label }}</span>
+
+          <!-- Badge with dynamic value -->
+          <span *ngIf="item.badge && !isCollapsed" 
+                class="px-2 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r text-white shadow-md"
+                [ngClass]="item.badgeColor || 'from-red-400 to-pink-500'">
+            {{ item.badge > 99 ? '99+' : item.badge }}
+          </span>
+
+          <span *ngIf="item.children && !isCollapsed" 
+                class="material-icons text-sm transition-transform"
+                [ngClass]="{'rotate-180': isMenuExpanded(item.id)}">
+            expand_more
+          </span>
+
+          <!-- Tooltip for collapsed view -->
+          <div *ngIf="isCollapsed" 
+               class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+            {{ item.label }}
+            <span *ngIf="item.badge" class="ml-1 px-1 bg-red-500 rounded-full">({{ item.badge }})</span>
+          </div>
+        </div>
+
+        <!-- Child Menu Items -->
+        <div *ngIf="item.children && isMenuExpanded(item.id) && !isCollapsed" 
+             class="ml-8 mt-1 space-y-1">
+          <div *ngFor="let child of item.children"
+               (click)="onSectionSelect(child)"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer group"
+               [ngClass]="[
+                 activeSection === child.id
+                   ? 'bg-gradient-to-r from-green-400/20 to-blue-500/20 text-green-600' 
+                   : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+               ]">
+            <span class="material-icons text-sm">{{ child.icon }}</span>
+            <span class="flex-1 text-xs">{{ child.label }}</span>
+            <span *ngIf="child.badge" 
+                  class="px-1.5 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r text-white"
+                  [ngClass]="child.badgeColor || 'from-red-400 to-pink-500'">
+              {{ child.badge }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   </nav>
 
-  <!-- Logout Confirmation Modal -->
-<div
-*ngIf="showLogoutModal"
-class="fixed inset-0 bg-gray-100/70 flex items-center justify-center z-50 backdrop-blur-sm"
->
-<div
-  class="bg-white rounded-2xl shadow-xl p-6 w-80 sm:w-96 flex flex-col items-center transform transition-transform duration-300 hover:scale-[1.02]"
->
-  <!-- Icon -->
-  <div
-    class="bg-red-100 text-red-600 w-14 h-14 rounded-full flex items-center justify-center mb-4 text-2xl transform transition-transform duration-300 hover:scale-110"
-  >
-    <span class="material-icons">logout</span>
+  <!-- Admin Profile Section -->
+  <div class="p-4 border-t border-gray-200">
+    <!-- Collapsed View -->
+    <div *ngIf="isCollapsed" class="relative group">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white font-bold cursor-pointer"
+           (click)="toggleMenu('profile')">
+        {{ getInitials() }}
+      </div>
+      <div class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+        {{ adminName }}
+      </div>
+    </div>
+
+    <!-- Expanded View -->
+    <div *ngIf="!isCollapsed" class="space-y-3">
+      <!-- Stats Summary -->
+      <div class="grid grid-cols-3 gap-1 text-center">
+        <div class="p-1 rounded-lg bg-green-50">
+          <p class="text-xs text-gray-500">Users</p>
+          <p class="text-sm font-bold text-green-600">{{ formatNumber(stats.totalUsers) }}</p>
+        </div>
+        <div class="p-1 rounded-lg bg-blue-50">
+          <p class="text-xs text-gray-500">Products</p>
+          <p class="text-sm font-bold text-blue-600">{{ formatNumber(stats.totalProducts) }}</p>
+        </div>
+        <div class="p-1 rounded-lg bg-purple-50">
+          <p class="text-xs text-gray-500">Orders</p>
+          <p class="text-sm font-bold text-purple-600">{{ formatNumber(stats.totalOrders) }}</p>
+        </div>
+      </div>
+
+      <!-- Admin Info -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white font-bold shadow-md">
+          {{ getInitials() }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium truncate">{{ adminName }}</p>
+          <p class="text-xs text-gray-500 truncate">{{ adminEmail }}</p>
+        </div>
+      </div>
+
+      <!-- Logout Button -->
+      <button (click)="onSectionSelect({id: 'logout', label: 'Logout', icon: 'logout', route: '#'})"
+              class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100">
+        <span class="material-icons text-xl group-hover:scale-110 transition-transform">logout</span>
+        <span class="text-sm font-medium">Logout</span>
+      </button>
+    </div>
   </div>
+</aside>
 
-  <!-- Header -->
-  <h2 class="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
-    Logout
-    <span class="material-icons text-gray-400 text-lg transition-transform duration-300 hover:scale-110">
-      help_outline
-    </span>
-  </h2>
+<!-- Logout Confirmation Modal -->
+<div *ngIf="showLogoutModal" 
+     class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+     (click)="cancelLogout()">
+  
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-slide-up" 
+       (click)="$event.stopPropagation()">
+    
+    <div class="bg-gradient-to-r from-red-500 to-pink-500 text-white p-6 rounded-t-2xl">
+      <div class="flex items-center gap-3">
+        <div class="bg-white/20 rounded-full p-2">
+          <span class="material-icons text-2xl">admin_panel_settings</span>
+        </div>
+        <h3 class="text-xl font-bold">Confirm Logout</h3>
+      </div>
+    </div>
 
-  <!-- Message -->
-  <p class="text-gray-600 text-center mb-6">Are you sure you want to logout?</p>
+    <div class="p-6">
+      <div class="text-center mb-6">
+        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-50 mb-4">
+          <span class="material-icons text-red-500 text-3xl">logout</span>
+        </div>
+        <p class="text-gray-700 text-lg mb-2">
+          Ready to leave, {{ adminName }}?
+        </p>
+        <p class="text-sm text-gray-500">
+          You will be logged out of the admin portal.
+        </p>
+      </div>
 
-  <!-- Buttons -->
-  <div class="flex justify-end gap-3 w-full">
-    <button
-      (click)="cancelLogout()"
-      class="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition-transform duration-300 hover:scale-105"
-    >
-      <span class="material-icons text-gray-600 text-base transition-transform duration-300 hover:scale-125">
-        close
-      </span>
-      Cancel
-    </button>
-    <button
-      (click)="confirmLogout()"
-      class="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:opacity-90 transition-transform duration-300 hover:scale-105"
-    >
-      <span class="material-icons text-white text-base transition-transform duration-300 hover:scale-125">
-        logout
-      </span>
-      Logout
-    </button>
+      <!-- Session Info -->
+      <div class="bg-gray-50 rounded-xl p-4 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white font-bold">
+            {{ getInitials() }}
+          </div>
+          <div>
+            <p class="font-medium text-gray-800">{{ adminName }}</p>
+            <p class="text-xs text-gray-500">{{ adminEmail }}</p>
+          </div>
+        </div>
+        <div class="mt-3 text-xs text-gray-500 flex items-center gap-2">
+          <span class="material-icons text-sm">access_time</span>
+          <span>Session started: {{ currentTime }}</span>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button (click)="cancelLogout()"
+                class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition font-medium">
+          Cancel
+        </button>
+        <button (click)="confirmLogout()"
+                class="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl font-medium shadow-lg transition flex items-center justify-center gap-2">
+          <span class="material-icons text-sm">logout</span>
+          Logout
+        </button>
+      </div>
+    </div>
   </div>
-</div>
-</div>
-
 </div>

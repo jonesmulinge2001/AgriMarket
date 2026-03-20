@@ -1,155 +1,725 @@
 <!-- Main Navbar template -->
 <div
-  class="fixed top-0 left-0 right-0 z-55 bg-white shadow-sm px-4 py-3 h-16 flex items-center justify-between"
->
-  <!-- Logo -->
-  <div class="flex items-center space-x-2">
-    <img
-      routerLink="/"
-      src="farm.png"
-      alt=""
-      class="h-8 w-32 object-cover cursor-pointer"
-    />
+  class="fixed top-0 left-0 right-0 z-55 transition-all duration-300 px-6 py-3 h-16 flex items-center justify-between"
+  [ngClass]="{
+    'bg-white/90 backdrop-blur-md shadow-lg border-b border-gray-100': !isDarkMode,
+    'bg-gray-900/90 backdrop-blur-md shadow-lg border-b border-gray-800': isDarkMode
+  }">
+  
+  <!-- Logo Section -->
+  <div class="flex items-center space-x-3 group">
+    <div class="relative">
+      <div
+        class="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm">
+      </div>
+      <img routerLink="/" src="farm.png" alt="Farmer's Portal"
+        class="relative h-10 w-auto object-contain cursor-pointer transform transition-transform duration-300 group-hover:scale-105" />
+    </div>
+    <span
+      class="hidden md:inline-block text-lg font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+      {{ currentLanguage.code === 'sw' ? 'Kilimo Portal' : 
+         currentLanguage.code === 'fr' ? 'Portail Agricole' :
+         currentLanguage.code === 'ar' ? 'بوابة المزارع' :
+         "Farmer's Portal" }}
+    </span>
   </div>
 
-  <!-- Engagement Icons -->
-  <div class="flex items-center space-x-4">
-    <!-- Cart Icon - Always visible -->
-    <button
-      (click)="navigateToCart()"
-      class="relative p-2 text-gray-600 hover:text-green-600 transition-colors"
-      [class.text-green-600]="router.url === '/cart'"
-    >
-      <span class="material-icons text-2xl">shopping_cart</span>
-
-      <!-- Cart Badge -->
+  <!-- Search Bar (Desktop) -->
+  <div class="hidden md:flex flex-1 max-w-md mx-8 relative search-container">
+    <div class="relative w-full group">
       <span
-        *ngIf="cartItemCount > 0"
-        class="absolute -top-1 -right-1 bg-gradient-to-r from-green-400 to-blue-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center shadow-lg animate-pulse"
-      >
-        {{ cartItemCount > 99 ? "99+" : cartItemCount }}
-      </span>
-    </button>
-
-    <!-- Mobile Search Button -->
-    <button
-      (click)="toggleSearchPanel()"
-      class="material-icons text-gray-500 text-2xl cursor-pointer sm:hidden"
-    >
-      search
-    </button>
-
-    <!-- Profile Dropdown (only when logged in) -->
-    <div *ngIf="isLoggedIn" class="relative profile-dropdown-container">
-      <button
-        (click)="toggleMenu()"
-        class="flex items-center space-x-2 focus:outline-none"
-      >
-        <div
-          class="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white font-semibold"
-        >
-          <!-- You can add user image or initial here -->
-          U
-        </div>
-      </button>
-
-      <!-- Dropdown Menu -->
-      <div
-        *ngIf="menuOpen"
-        class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border"
-      >
-        <button
-          (click)="viewProfile()"
-          class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center"
-        >
-          <span class="material-icons text-sm mr-2">person</span>
-          My Profile
-        </button>
-
-        <button
-          (click)="navigateToCart()"
-          class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
-        >
-          <div class="flex items-center">
-            <span class="material-icons text-sm mr-2">shopping_cart</span>
-            My Cart
-          </div>
-          <span
-            *ngIf="cartItemCount > 0"
-            class="bg-green-500 text-white text-xs rounded-full px-2 py-1"
-          >
-            {{ cartItemCount }}
-          </span>
-        </button>
-
-        <!-- Add this to your profile dropdown menu in navbar -->
-        <button
-          (click)="viewOrders()"
-          class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center"
-        >
-          <span class="material-icons text-sm mr-2">receipt</span>
-          My Orders
-        </button>
-
-        <button
-          (click)="openLogoutModal()"
-          class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 flex items-center"
-        >
-          <span class="material-icons text-sm mr-2">logout</span>
-          Logout
-        </button>
+        class="material-icons absolute left-3 top-2.5 transition-colors"
+        [ngClass]="{
+          'text-gray-400 group-focus-within:text-green-500': !isDarkMode,
+          'text-gray-500 group-focus-within:text-green-400': isDarkMode
+        }">search</span>
+      <input type="text" [(ngModel)]="searchQuery" (focus)="toggleSearchPanel()"
+        [placeholder]="currentLanguage.code === 'sw' ? 'Tafuta bidhaa, wakulima...' :
+                       currentLanguage.code === 'fr' ? 'Rechercher produits, agriculteurs...' :
+                       currentLanguage.code === 'ar' ? 'البحث عن المنتجات والمزارعين...' :
+                       'Search products, farmers...'"
+        class="w-full pl-10 pr-4 py-2 rounded-full border transition-all"
+        [ngClass]="{
+          'border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-400 text-gray-900': !isDarkMode,
+          'border-gray-700 bg-gray-800 focus:bg-gray-800 focus:ring-2 focus:ring-green-500 text-gray-100 placeholder-gray-500': isDarkMode
+        }" />
+      <div *ngIf="searchQuery" (click)="searchQuery = ''"
+        class="absolute right-3 top-2.5 cursor-pointer"
+        [ngClass]="{
+          'text-gray-400 hover:text-gray-600': !isDarkMode,
+          'text-gray-500 hover:text-gray-300': isDarkMode
+        }">
+        <span class="material-icons text-sm">close</span>
       </div>
     </div>
 
-    <!-- Login Button (when not logged in) -->
-    <button
-      *ngIf="!isLoggedIn"
-      routerLink="/login"
-      class="px-4 py-2 bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-full text-sm font-semibold hover:from-blue-500 hover:to-green-400 transition"
-    >
-      Login
+    <!-- Search Results Panel -->
+    <div *ngIf="searchPanelOpen"
+      class="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl overflow-hidden z-50 animate-slide-down"
+      [ngClass]="{
+        'bg-white border border-gray-100': !isDarkMode,
+        'bg-gray-800 border border-gray-700': isDarkMode
+      }">
+      <div class="p-3 border-b" [ngClass]="{
+        'border-gray-100 bg-gray-50': !isDarkMode,
+        'border-gray-700 bg-gray-700': isDarkMode
+      }">
+        <p class="text-xs" [ngClass]="{
+          'text-gray-500': !isDarkMode,
+          'text-gray-400': isDarkMode
+        }">{{ currentLanguage.code === 'sw' ? 'Tafuta za Hivi Karibuni' :
+            currentLanguage.code === 'fr' ? 'Recherches Récentes' :
+            currentLanguage.code === 'ar' ? 'عمليات البحث الأخيرة' :
+            'Recent Searches' }}</p>
+      </div>
+      <div class="max-h-80 overflow-y-auto">
+        <div class="p-3 cursor-pointer flex items-center gap-3 transition-colors"
+          [ngClass]="{
+            'hover:bg-gray-50': !isDarkMode,
+            'hover:bg-gray-700': isDarkMode
+          }">
+          <span class="material-icons" [ngClass]="{
+            'text-gray-400': !isDarkMode,
+            'text-gray-500': isDarkMode
+          }">history</span>
+          <span class="text-sm" [ngClass]="{
+            'text-gray-700': !isDarkMode,
+            'text-gray-300': isDarkMode
+          }">Fresh vegetables</span>
+        </div>
+        <div class="p-3 cursor-pointer flex items-center gap-3 transition-colors"
+          [ngClass]="{
+            'hover:bg-gray-50': !isDarkMode,
+            'hover:bg-gray-700': isDarkMode
+          }">
+          <span class="material-icons" [ngClass]="{
+            'text-gray-400': !isDarkMode,
+            'text-gray-500': isDarkMode
+          }">history</span>
+          <span class="text-sm" [ngClass]="{
+            'text-gray-700': !isDarkMode,
+            'text-gray-300': isDarkMode
+          }">Organic fruits</span>
+        </div>
+      </div>
+      <div class="p-3 border-t" [ngClass]="{
+        'border-gray-100': !isDarkMode,
+        'border-gray-700': isDarkMode
+      }">
+        <button (click)="viewAllResults()"
+          class="w-full text-center text-sm font-medium transition-colors"
+          [ngClass]="{
+            'text-green-600 hover:text-green-700': !isDarkMode,
+            'text-green-400 hover:text-green-300': isDarkMode
+          }">
+          {{ currentLanguage.code === 'sw' ? 'Tazama Matokeo Yote' :
+             currentLanguage.code === 'fr' ? 'Voir tous les résultats' :
+             currentLanguage.code === 'ar' ? 'عرض جميع النتائج' :
+             'View all results' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Section -->
+  <div class="flex items-center space-x-2">
+    <!-- Language Selector -->
+    <div class="relative language-dropdown">
+      <button (click)="toggleLanguageMenu()"
+        class="p-2 rounded-full transition-all group"
+        [ngClass]="{
+          'text-gray-500 hover:text-green-600 hover:bg-green-50': !isDarkMode,
+          'text-gray-400 hover:text-green-400 hover:bg-gray-800': isDarkMode
+        }">
+        <span class="text-xl">{{ currentLanguage.flag }}</span>
+        <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+          {{ currentLanguage.code === 'sw' ? 'Badilisha Lugha' :
+             currentLanguage.code === 'fr' ? 'Changer de Langue' :
+             currentLanguage.code === 'ar' ? 'تغيير اللغة' :
+             'Change Language' }}
+        </span>
+      </button>
+
+      <!-- Language Dropdown Menu -->
+      <div *ngIf="languageMenuOpen"
+        class="absolute right-0 mt-3 w-48 rounded-xl shadow-2xl py-2 z-50 animate-slide-down"
+        [ngClass]="{
+          'bg-white border border-gray-100': !isDarkMode,
+          'bg-gray-800 border border-gray-700': isDarkMode
+        }">
+        <div *ngFor="let lang of languages"
+          (click)="changeLanguage(lang)"
+          class="px-4 py-3 cursor-pointer flex items-center gap-3 transition-colors"
+          [ngClass]="{
+            'hover:bg-gray-50': !isDarkMode && currentLanguage.code !== lang.code,
+            'hover:bg-gray-700': isDarkMode && currentLanguage.code !== lang.code,
+            'bg-gradient-to-r from-green-50 to-blue-50': !isDarkMode && currentLanguage.code === lang.code,
+            'bg-gradient-to-r from-green-900/30 to-blue-900/30': isDarkMode && currentLanguage.code === lang.code
+          }">
+          <span class="text-xl">{{ lang.flag }}</span>
+          <span class="text-sm font-medium" [ngClass]="{
+            'text-gray-900': !isDarkMode,
+            'text-gray-100': isDarkMode
+          }">{{ lang.name }}</span>
+          <span *ngIf="currentLanguage.code === lang.code"
+            class="material-icons text-green-500 text-sm ml-auto">check</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop Search Toggle -->
+    <button (click)="toggleSearchPanel()"
+      class="hidden md:flex p-2 rounded-full transition-all group"
+      [ngClass]="{
+        'text-gray-500 hover:text-green-600 hover:bg-green-50': !isDarkMode,
+        'text-gray-400 hover:text-green-400 hover:bg-gray-800': isDarkMode
+      }">
+      <span class="material-icons text-2xl">search</span>
+      <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+        {{ currentLanguage.code === 'sw' ? 'Tafuta' :
+           currentLanguage.code === 'fr' ? 'Rechercher' :
+           currentLanguage.code === 'ar' ? 'بحث' :
+           'Search' }}
+      </span>
     </button>
+
+    <!-- Notifications -->
+    <button class="relative p-2 rounded-full transition-all group"
+      [ngClass]="{
+        'text-gray-500 hover:text-green-600 hover:bg-green-50': !isDarkMode,
+        'text-gray-400 hover:text-green-400 hover:bg-gray-800': isDarkMode
+      }">
+      <span class="material-icons text-2xl">notifications</span>
+      <span *ngIf="unreadCount > 0"
+        class="absolute top-1 right-1 w-4 h-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg">
+        {{ unreadCount > 9 ? '9+' : unreadCount }}
+      </span>
+      <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+        {{ currentLanguage.code === 'sw' ? 'Arifa' :
+           currentLanguage.code === 'fr' ? 'Notifications' :
+           currentLanguage.code === 'ar' ? 'إشعارات' :
+           'Notifications' }}
+      </span>
+    </button>
+
+    <!-- Messages -->
+    <button (click)="chatOpened.emit()"
+      class="relative p-2 rounded-full transition-all group"
+      [ngClass]="{
+        'text-gray-500 hover:text-green-600 hover:bg-green-50': !isDarkMode,
+        'text-gray-400 hover:text-green-400 hover:bg-gray-800': isDarkMode
+      }">
+      <span class="material-icons text-2xl">chat</span>
+      <span *ngIf="totalUnreadMessages > 0"
+        class="absolute top-1 right-1 w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg">
+        {{ totalUnreadMessages > 9 ? '9+' : totalUnreadMessages }}
+      </span>
+      <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+        {{ currentLanguage.code === 'sw' ? 'Ujumbe' :
+           currentLanguage.code === 'fr' ? 'Messages' :
+           currentLanguage.code === 'ar' ? 'رسائل' :
+           'Messages' }}
+      </span>
+    </button>
+
+    <!-- Cart Icon -->
+    <button (click)="navigateToCart()"
+      class="relative p-2 rounded-full transition-all group"
+      [ngClass]="{
+        'text-gray-500 hover:text-green-600 hover:bg-green-50': !isDarkMode && !isCartActive(),
+        'text-gray-400 hover:text-green-400 hover:bg-gray-800': isDarkMode && !isCartActive(),
+        'text-green-600 bg-green-50': !isDarkMode && isCartActive(),
+        'text-green-400 bg-gray-800': isDarkMode && isCartActive()
+      }">
+      <span class="material-icons text-2xl">shopping_cart</span>
+
+      <!-- Cart Badge -->
+      <span *ngIf="cartItemCount > 0"
+        class="absolute -top-1 -right-1 bg-gradient-to-r from-green-400 to-blue-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center shadow-lg animate-pulse">
+        {{ cartItemCount > 99 ? "99+" : cartItemCount }}
+      </span>
+      <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+        {{ currentLanguage.code === 'sw' ? 'Kikapu' :
+           currentLanguage.code === 'fr' ? 'Panier' :
+           currentLanguage.code === 'ar' ? 'سلة التسوق' :
+           'Cart' }}
+      </span>
+    </button>
+
+    <!-- Profile Dropdown -->
+    <div *ngIf="isLoggedIn" class="relative profile-dropdown-container ml-2">
+      <button (click)="toggleMenu()" class="flex items-center space-x-2 focus:outline-none group">
+        <div class="relative">
+          <div
+            class="w-9 h-9 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white font-semibold shadow-md transform transition-transform group-hover:scale-105">
+            {{ userImage ? '' : getInitials() }}
+            <img *ngIf="userImage" [src]="userImage" [alt]="userName" class="w-full h-full rounded-full object-cover">
+          </div>
+          <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+        </div>
+        <span class="hidden md:inline-block text-sm font-medium transition-colors"
+          [ngClass]="{
+            'text-gray-700 group-hover:text-gray-900': !isDarkMode,
+            'text-gray-300 group-hover:text-gray-100': isDarkMode
+          }">
+          {{ userName || 'User' }}
+        </span>
+        <span class="material-icons text-sm transition-colors"
+          [ngClass]="{
+            'text-gray-400 group-hover:text-gray-600': !isDarkMode,
+            'text-gray-500 group-hover:text-gray-300': isDarkMode
+          }">
+          {{ menuOpen ? 'expand_less' : 'expand_more' }}
+        </span>
+      </button>
+
+      <!-- Dropdown Menu -->
+      <div *ngIf="menuOpen"
+        class="absolute right-0 mt-3 w-64 rounded-xl shadow-2xl py-2 z-50 animate-slide-down"
+        [ngClass]="{
+          'bg-white border border-gray-100': !isDarkMode,
+          'bg-gray-800 border border-gray-700': isDarkMode
+        }">
+        <!-- User Info Header -->
+        <div class="px-4 py-3 border-b"
+          [ngClass]="{
+            'border-gray-100 bg-gradient-to-r from-green-50 to-blue-50': !isDarkMode,
+            'border-gray-700 bg-gradient-to-r from-green-900/30 to-blue-900/30': isDarkMode
+          }">
+          <p class="text-sm font-semibold"
+            [ngClass]="{
+              'text-gray-800': !isDarkMode,
+              'text-gray-100': isDarkMode
+            }">{{ userName || 'User' }}</p>
+          <p class="text-xs"
+            [ngClass]="{
+              'text-gray-500': !isDarkMode,
+              'text-gray-400': isDarkMode
+            }">{{ userEmail || 'user@example.com' }}</p>
+        </div>
+
+        <!-- Menu Items -->
+        <div class="py-2">
+          <button (click)="viewProfile()"
+            class="w-full text-left px-4 py-3 flex items-center gap-3 transition-all group"
+            [ngClass]="{
+              'text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-blue-50': !isDarkMode,
+              'text-gray-300 hover:bg-gradient-to-r hover:from-green-900/30 hover:to-blue-900/30': isDarkMode
+            }">
+            <span class="material-icons"
+              [ngClass]="{
+                'text-gray-400 group-hover:text-green-500': !isDarkMode,
+                'text-gray-500 group-hover:text-green-400': isDarkMode
+              }">person</span>
+            <span class="text-sm font-medium">{{ currentLanguage.code === 'sw' ? 'Wasifu Wangu' :
+                currentLanguage.code === 'fr' ? 'Mon Profil' :
+                currentLanguage.code === 'ar' ? 'ملفي الشخصي' :
+                'My Profile' }}</span>
+            <span class="material-icons text-sm ml-auto"
+              [ngClass]="{
+                'text-gray-300': !isDarkMode,
+                'text-gray-600': isDarkMode
+              }">chevron_right</span>
+          </button>
+
+          <button (click)="navigateToCart()"
+            class="w-full text-left px-4 py-3 flex items-center gap-3 transition-all group"
+            [ngClass]="{
+              'text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-blue-50': !isDarkMode,
+              'text-gray-300 hover:bg-gradient-to-r hover:from-green-900/30 hover:to-blue-900/30': isDarkMode
+            }">
+            <span class="material-icons"
+              [ngClass]="{
+                'text-gray-400 group-hover:text-green-500': !isDarkMode,
+                'text-gray-500 group-hover:text-green-400': isDarkMode
+              }">shopping_cart</span>
+            <span class="text-sm font-medium">{{ currentLanguage.code === 'sw' ? 'Kikapu Changu' :
+                currentLanguage.code === 'fr' ? 'Mon Panier' :
+                currentLanguage.code === 'ar' ? 'سلة التسوق' :
+                'My Cart' }}</span>
+            <span *ngIf="cartItemCount > 0"
+              class="ml-auto bg-gradient-to-r from-green-400 to-blue-500 text-white text-xs rounded-full px-2 py-1">
+              {{ cartItemCount }}
+            </span>
+          </button>
+
+          <button (click)="viewOrders()"
+            class="w-full text-left px-4 py-3 flex items-center gap-3 transition-all group"
+            [ngClass]="{
+              'text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-blue-50': !isDarkMode,
+              'text-gray-300 hover:bg-gradient-to-r hover:from-green-900/30 hover:to-blue-900/30': isDarkMode
+            }">
+            <span class="material-icons"
+              [ngClass]="{
+                'text-gray-400 group-hover:text-green-500': !isDarkMode,
+                'text-gray-500 group-hover:text-green-400': isDarkMode
+              }">receipt</span>
+            <span class="text-sm font-medium">{{ currentLanguage.code === 'sw' ? 'Maagizo Yangu' :
+                currentLanguage.code === 'fr' ? 'Mes Commandes' :
+                currentLanguage.code === 'ar' ? 'طلباتي' :
+                'My Orders' }}</span>
+            <span class="material-icons text-sm ml-auto"
+              [ngClass]="{
+                'text-gray-300': !isDarkMode,
+                'text-gray-600': isDarkMode
+              }">chevron_right</span>
+          </button>
+
+          <div class="border-t my-2" [ngClass]="{
+            'border-gray-100': !isDarkMode,
+            'border-gray-700': isDarkMode
+          }"></div>
+
+          <button (click)="toggleSettingsPanel()"
+            class="w-full text-left px-4 py-3 flex items-center gap-3 transition-all group"
+            [ngClass]="{
+              'text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-blue-50': !isDarkMode,
+              'text-gray-300 hover:bg-gradient-to-r hover:from-green-900/30 hover:to-blue-900/30': isDarkMode
+            }">
+            <span class="material-icons"
+              [ngClass]="{
+                'text-gray-400 group-hover:text-green-500': !isDarkMode,
+                'text-gray-500 group-hover:text-green-400': isDarkMode
+              }">settings</span>
+            <span class="text-sm font-medium">{{ currentLanguage.code === 'sw' ? 'Mipangilio' :
+                currentLanguage.code === 'fr' ? 'Paramètres' :
+                currentLanguage.code === 'ar' ? 'الإعدادات' :
+                'Settings' }}</span>
+            <span class="material-icons text-sm ml-auto"
+              [ngClass]="{
+                'text-gray-300': !isDarkMode,
+                'text-gray-600': isDarkMode
+              }">chevron_right</span>
+          </button>
+
+          <button (click)="openLogoutModal()"
+            class="w-full text-left px-4 py-3 flex items-center gap-3 transition-all group"
+            [ngClass]="{
+              'text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100': !isDarkMode,
+              'text-red-400 hover:bg-gradient-to-r hover:from-red-900/30 hover:to-red-900/30': isDarkMode
+            }">
+            <span class="material-icons"
+              [ngClass]="{
+                'text-red-400 group-hover:text-red-600': !isDarkMode,
+                'text-red-500 group-hover:text-red-400': isDarkMode
+              }">logout</span>
+            <span class="text-sm font-medium">{{ currentLanguage.code === 'sw' ? 'Toka' :
+                currentLanguage.code === 'fr' ? 'Déconnexion' :
+                currentLanguage.code === 'ar' ? 'تسجيل الخروج' :
+                'Logout' }}</span>
+            <span class="material-icons text-sm ml-auto"
+              [ngClass]="{
+                'text-red-200 group-hover:text-red-300': !isDarkMode,
+                'text-red-800 group-hover:text-red-700': isDarkMode
+              }">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Button -->
+    <button *ngIf="!isLoggedIn" routerLink="/login"
+      class="px-5 py-2 bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white rounded-full text-sm font-semibold shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2">
+      <span class="material-icons text-sm">login</span>
+      <span>{{ currentLanguage.code === 'sw' ? 'Ingia' :
+             currentLanguage.code === 'fr' ? 'Connexion' :
+             currentLanguage.code === 'ar' ? 'تسجيل الدخول' :
+             'Login' }}</span>
+    </button>
+  </div>
+</div>
+
+<!-- Mobile Search Panel -->
+<div *ngIf="searchPanelOpen"
+  class="fixed top-16 left-0 right-0 p-4 z-40 md:hidden animate-slide-down border-t"
+  [ngClass]="{
+    'bg-white border-gray-100 shadow-lg': !isDarkMode,
+    'bg-gray-800 border-gray-700 shadow-lg': isDarkMode
+  }">
+  <div class="relative">
+    <span class="material-icons absolute left-3 top-2.5"
+      [ngClass]="{
+        'text-gray-400': !isDarkMode,
+        'text-gray-500': isDarkMode
+      }">search</span>
+    <input type="text" [(ngModel)]="searchQuery"
+      [placeholder]="currentLanguage.code === 'sw' ? 'Tafuta bidhaa, wakulima...' :
+                     currentLanguage.code === 'fr' ? 'Rechercher produits, agriculteurs...' :
+                     currentLanguage.code === 'ar' ? 'البحث عن المنتجات والمزارعين...' :
+                     'Search products, farmers...'"
+      class="w-full pl-10 pr-4 py-2 rounded-full border transition-all"
+      [ngClass]="{
+        'border-gray-200 focus:ring-2 focus:ring-green-400 text-gray-900': !isDarkMode,
+        'border-gray-700 bg-gray-700 focus:ring-2 focus:ring-green-500 text-gray-100 placeholder-gray-500': isDarkMode
+      }" />
+    <button (click)="closeSearchPanel()" class="absolute right-3 top-2.5"
+      [ngClass]="{
+        'text-gray-400 hover:text-gray-600': !isDarkMode,
+        'text-gray-500 hover:text-gray-300': isDarkMode
+      }">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+  <div class="mt-3 flex justify-between">
+    <button (click)="viewAllResults()" class="text-sm font-medium transition-colors"
+      [ngClass]="{
+        'text-green-600 hover:text-green-700': !isDarkMode,
+        'text-green-400 hover:text-green-300': isDarkMode
+      }">
+      {{ currentLanguage.code === 'sw' ? 'Tazama Matokeo Yote' :
+         currentLanguage.code === 'fr' ? 'Voir tous les résultats' :
+         currentLanguage.code === 'ar' ? 'عرض جميع النتائج' :
+         'View all results' }}
+    </button>
+    <button (click)="closeSearchPanel()" class="text-sm transition-colors"
+      [ngClass]="{
+        'text-gray-500 hover:text-gray-700': !isDarkMode,
+        'text-gray-400 hover:text-gray-200': isDarkMode
+      }">
+      {{ currentLanguage.code === 'sw' ? 'Ghairi' :
+         currentLanguage.code === 'fr' ? 'Annuler' :
+         currentLanguage.code === 'ar' ? 'إلغاء' :
+         'Cancel' }}
+    </button>
+  </div>
+</div>
+
+<!-- Settings Panel -->
+<div *ngIf="settingsPanelOpen"
+  class="fixed inset-y-0 right-0 w-80 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out animate-slide-left border-l"
+  [ngClass]="{
+    'bg-white border-gray-100': !isDarkMode,
+    'bg-gray-800 border-gray-700': isDarkMode
+  }">
+  <div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-lg font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+        {{ currentLanguage.code === 'sw' ? 'Mipangilio' :
+           currentLanguage.code === 'fr' ? 'Paramètres' :
+           currentLanguage.code === 'ar' ? 'الإعدادات' :
+           'Settings' }}
+      </h3>
+      <button (click)="closeSettingsPanel()" class="p-1 rounded-full transition"
+        [ngClass]="{
+          'hover:bg-gray-100': !isDarkMode,
+          'hover:bg-gray-700': isDarkMode
+        }">
+        <span class="material-icons"
+          [ngClass]="{
+            'text-gray-600': !isDarkMode,
+            'text-gray-400': isDarkMode
+          }">close</span>
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <!-- Dark Mode Toggle -->
+      <div class="flex items-center justify-between p-3 rounded-xl"
+        [ngClass]="{
+          'bg-gray-50': !isDarkMode,
+          'bg-gray-700': isDarkMode
+        }">
+        <div class="flex items-center gap-3">
+          <span class="material-icons"
+            [ngClass]="{
+              'text-gray-600': !isDarkMode,
+              'text-gray-400': isDarkMode
+            }">{{ isDarkMode ? 'dark_mode' : 'light_mode' }}</span>
+          <span class="text-sm font-medium"
+            [ngClass]="{
+              'text-gray-700': !isDarkMode,
+              'text-gray-300': isDarkMode
+            }">{{ currentLanguage.code === 'sw' ? 'Hali ya Giza' :
+                currentLanguage.code === 'fr' ? 'Mode Sombre' :
+                currentLanguage.code === 'ar' ? 'الوضع الداكن' :
+                'Dark Mode' }}</span>
+        </div>
+        <button (click)="toggleDarkMode()"
+          class="w-12 h-6 rounded-full relative transition-colors"
+          [ngClass]="{
+            'bg-gray-300': !isDarkMode && !this.isDarkMode,
+            'bg-green-500': !isDarkMode && this.isDarkMode,
+            'bg-gray-600': isDarkMode && !this.isDarkMode,
+            'bg-green-600': isDarkMode && this.isDarkMode
+          }">
+          <span class="absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300"
+            [ngClass]="{
+              'left-1': !isDarkMode,
+              'right-1': isDarkMode
+            }"></span>
+        </button>
+      </div>
+
+      <!-- Notifications Toggle -->
+      <div class="flex items-center justify-between p-3 rounded-xl"
+        [ngClass]="{
+          'bg-gray-50': !isDarkMode,
+          'bg-gray-700': isDarkMode
+        }">
+        <div class="flex items-center gap-3">
+          <span class="material-icons"
+            [ngClass]="{
+              'text-gray-600': !isDarkMode,
+              'text-gray-400': isDarkMode
+            }">notifications_active</span>
+          <span class="text-sm font-medium"
+            [ngClass]="{
+              'text-gray-700': !isDarkMode,
+              'text-gray-300': isDarkMode
+            }">{{ currentLanguage.code === 'sw' ? 'Arifa' :
+                currentLanguage.code === 'fr' ? 'Notifications' :
+                currentLanguage.code === 'ar' ? 'الإشعارات' :
+                'Notifications' }}</span>
+        </div>
+        <button class="w-12 h-6 bg-green-500 rounded-full relative">
+          <span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
+        </button>
+      </div>
+
+      <!-- Language Selector -->
+      <div class="p-3 rounded-xl"
+        [ngClass]="{
+          'bg-gray-50': !isDarkMode,
+          'bg-gray-700': isDarkMode
+        }">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="material-icons"
+            [ngClass]="{
+              'text-gray-600': !isDarkMode,
+              'text-gray-400': isDarkMode
+            }">language</span>
+          <span class="text-sm font-medium"
+            [ngClass]="{
+              'text-gray-700': !isDarkMode,
+              'text-gray-300': isDarkMode
+            }">{{ currentLanguage.code === 'sw' ? 'Lugha' :
+                currentLanguage.code === 'fr' ? 'Langue' :
+                currentLanguage.code === 'ar' ? 'اللغة' :
+                'Language' }}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button *ngFor="let lang of languages"
+            (click)="changeLanguage(lang)"
+            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
+            [ngClass]="{
+              'bg-gradient-to-r from-green-400 to-blue-500 text-white': currentLanguage.code === lang.code,
+              'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50': !isDarkMode && currentLanguage.code !== lang.code,
+              'bg-gray-600 border border-gray-600 text-gray-300 hover:bg-gray-500': isDarkMode && currentLanguage.code !== lang.code
+            }">
+            <span>{{ lang.flag }}</span>
+            <span>{{ lang.code === 'sw' ? 'Kiswahili' : lang.name }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- RTL Support Info -->
+      <div *ngIf="currentLanguage.direction === 'rtl'"
+        class="p-3 rounded-xl bg-blue-50 border border-blue-200 dark:bg-blue-900/30 dark:border-blue-800">
+        <p class="text-xs text-blue-700 dark:text-blue-300 flex items-center gap-2">
+          <span class="material-icons text-sm">info</span>
+          {{ currentLanguage.code === 'ar' ? 'تم تحسين الصفحة للعرض من اليمين إلى اليسار' : '' }}
+        </p>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- Logout Confirmation Modal -->
-<div
-  *ngIf="logoutModalOpen"
-  class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-70"
-  (click)="logoutModalOpen = false"
->
-  <div
-    class="bg-white rounded-2xl shadow-2xl p-6 w-80 max-w-sm relative"
-    (click)="$event.stopPropagation()"
-  >
-    <!-- Header -->
-    <div class="flex items-center mb-4">
-      <span class="material-icons text-red-500 mr-2 text-2xl">logout</span>
-      <h3 class="text-lg font-bold text-gray-900">Confirm Logout</h3>
+<div *ngIf="logoutModalOpen" class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-[100]"
+  (click)="logoutModalOpen = false">
+  <div class="rounded-2xl shadow-2xl p-6 w-96 max-w-sm relative animate-slide-up"
+    [ngClass]="{
+      'bg-white': !isDarkMode,
+      'bg-gray-800': isDarkMode
+    }" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="bg-gradient-to-r from-red-500 to-pink-500 text-white p-6 rounded-t-2xl -mt-6 -mx-6 mb-6">
+      <div class="flex items-center gap-3">
+        <div class="bg-white/20 rounded-full p-2">
+          <span class="material-icons text-2xl">logout</span>
+        </div>
+        <h3 class="text-xl font-bold">{{ currentLanguage.code === 'sw' ? 'Thibitisha Kutoka' :
+            currentLanguage.code === 'fr' ? 'Confirmer la Déconnexion' :
+            currentLanguage.code === 'ar' ? 'تأكيد تسجيل الخروج' :
+            'Confirm Logout' }}</h3>
+      </div>
     </div>
 
     <!-- Body -->
-    <p class="text-gray-600 mb-6">
-      Are you sure you want to log out? Your session will be ended immediately.
-    </p>
+    <div class="text-center mb-6">
+      <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-50 dark:bg-red-900/30 mb-4">
+        <span class="material-icons text-red-500 dark:text-red-400 text-3xl">logout</span>
+      </div>
+      <p class="mb-2" [ngClass]="{
+        'text-gray-700': !isDarkMode,
+        'text-gray-300': isDarkMode
+      }">{{ currentLanguage.code === 'sw' ? 'Uko tayari kuondoka?' :
+          currentLanguage.code === 'fr' ? 'Prêt à partir?' :
+          currentLanguage.code === 'ar' ? 'هل أنت مستعد للمغادرة؟' :
+          'Ready to leave?' }}</p>
+      <p class="text-sm"
+        [ngClass]="{
+          'text-gray-500': !isDarkMode,
+          'text-gray-400': isDarkMode
+        }">
+        {{ currentLanguage.code === 'sw' ? 'Utakatisha kipindi chako na kuelekezwa kwenye ukurasa wa kuingia.' :
+           currentLanguage.code === 'fr' ? 'Votre session sera terminée et vous serez redirigé vers la page de connexion.' :
+           currentLanguage.code === 'ar' ? 'سيتم إنهاء جلستك وإعادة توجيهك إلى صفحة تسجيل الدخول.' :
+           'Your session will be ended and you\'ll be redirected to the login page.' }}
+      </p>
+    </div>
+
+    <!-- User Info -->
+    <div class="rounded-xl p-4 mb-6"
+      [ngClass]="{
+        'bg-gray-50': !isDarkMode,
+        'bg-gray-700': isDarkMode
+      }">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white font-bold">
+          {{ getInitials() }}
+        </div>
+        <div>
+          <p class="font-medium"
+            [ngClass]="{
+              'text-gray-800': !isDarkMode,
+              'text-gray-200': isDarkMode
+            }">{{ userName || 'User' }}</p>
+          <p class="text-xs"
+            [ngClass]="{
+              'text-gray-500': !isDarkMode,
+              'text-gray-400': isDarkMode
+            }">{{ userEmail || 'user@example.com' }}</p>
+        </div>
+      </div>
+    </div>
 
     <!-- Actions -->
-    <div class="flex justify-end space-x-3">
-      <button
-        (click)="logoutModalOpen = false"
-        class="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition-all duration-300"
-      >
-        <span class="material-icons text-gray-500 text-base">cancel</span>
-        Cancel
+    <div class="flex gap-3">
+      <button (click)="logoutModalOpen = false"
+        class="flex-1 px-4 py-3 rounded-xl font-medium transition-all"
+        [ngClass]="{
+          'border border-gray-300 text-gray-700 hover:bg-gray-50': !isDarkMode,
+          'border border-gray-600 text-gray-300 hover:bg-gray-700': isDarkMode
+        }">
+        {{ currentLanguage.code === 'sw' ? 'Ghairi' :
+           currentLanguage.code === 'fr' ? 'Annuler' :
+           currentLanguage.code === 'ar' ? 'إلغاء' :
+           'Cancel' }}
       </button>
-
-      <button
-        (click)="logOut()"
-        class="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 shadow-lg transition-all duration-300"
-      >
-        <span class="material-icons text-white text-base">logout</span>
-        Logout
+      <button (click)="logOut()"
+        class="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2">
+        <span class="material-icons text-sm">logout</span>
+        {{ currentLanguage.code === 'sw' ? 'Toka' :
+           currentLanguage.code === 'fr' ? 'Déconnexion' :
+           currentLanguage.code === 'ar' ? 'تسجيل الخروج' :
+           'Logout' }}
       </button>
     </div>
   </div>
 </div>
+
+<!-- Backdrop for panels -->
+<div *ngIf="settingsPanelOpen" class="fixed inset-0 bg-black/20 z-40" (click)="closeSettingsPanel()"></div>

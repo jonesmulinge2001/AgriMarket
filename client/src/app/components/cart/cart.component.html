@@ -1,242 +1,385 @@
 <div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-green-400 to-blue-600 text-white">
-      <div class="container mx-auto px-4 py-8">
-        <div class="flex flex-col md:flex-row justify-between items-center">
-          <div>
-            <h1 class="text-3xl md:text-4xl font-bold mb-2">Shopping Cart</h1>
-            <p class="text-lg opacity-90">{{ summary.totalItems }} {{ summary.totalItems === 1 ? 'item' : 'items' }} in your cart</p>
-          </div>
-          <div class="mt-4 md:mt-0 flex space-x-4">
-            <button 
-              (click)="continueShopping()"
-              class="px-6 py-2 bg-white text-green-600 rounded-full font-semibold hover:bg-opacity-90 transition transform hover:scale-105 flex items-center"
-            >
-              <span class="material-icons text-sm mr-1">shopping_bag</span>
-              Continue Shopping
-            </button>
-          </div>
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-green-400 to-blue-600 text-white">
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-bold mb-2">Shopping Cart</h1>
+          <p class="text-lg opacity-90">{{ summary.totalItems }} {{ summary.totalItems === 1 ? 'item' : 'items' }} in your cart</p>
+        </div>
+        <div class="mt-4 md:mt-0 flex space-x-4">
+          <button 
+            (click)="continueShopping()"
+            class="px-6 py-2 bg-white text-green-600 rounded-full font-semibold hover:bg-opacity-90 transition transform hover:scale-105 flex items-center"
+          >
+            <span class="material-icons text-sm mr-1">shopping_bag</span>
+            Continue Shopping
+          </button>
         </div>
       </div>
     </div>
-  
-    <div class="container mx-auto px-4 py-8">
-      <!-- Success Message -->
-      <div *ngIf="successMessage" class="mb-6 bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded-xl flex items-center">
+  </div>
+
+  <div class="container mx-auto px-4 py-8">
+    <!-- Success Message -->
+    <div *ngIf="successMessage" 
+         class="mb-6 bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded-xl flex items-center justify-between animate-fade-in">
+      <div class="flex items-center">
         <span class="material-icons text-green-500 mr-2">check_circle</span>
         <span>{{ successMessage }}</span>
       </div>
-  
-      <!-- Error Message -->
-      <div *ngIf="error" class="mb-6 bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-xl flex items-center justify-between">
-        <div class="flex items-center">
-          <span class="material-icons text-red-500 mr-2">error</span>
-          <span>{{ error }}</span>
+      <button (click)="successMessage = null" class="text-green-500 hover:text-green-700">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="error" 
+         class="mb-6 bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-xl flex items-center justify-between animate-fade-in">
+      <div class="flex items-center">
+        <span class="material-icons text-red-500 mr-2">error</span>
+        <span>{{ error }}</span>
+      </div>
+      <button (click)="error = null" class="text-red-500 hover:text-red-700">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- Empty Cart State -->
+    <div *ngIf="cartItems.length === 0" class="text-center py-20">
+      <span class="material-icons text-6xl text-gray-400 mb-4">shopping_cart</span>
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">Your cart is empty</h3>
+      <p class="text-gray-500 mb-6">Looks like you haven't added any items to your cart yet</p>
+      <button 
+        (click)="continueShopping()"
+        class="px-8 py-3 bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-full font-semibold hover:from-blue-500 hover:to-green-400 transition transform hover:scale-105"
+      >
+        Start Shopping
+      </button>
+    </div>
+
+    <!-- Cart Items -->
+    <div *ngIf="cartItems.length > 0" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Cart Items List -->
+      <div class="lg:col-span-2 space-y-4">
+        <!-- Select All Bar -->
+        <div class="bg-white/80 backdrop-blur-md rounded-xl p-4 shadow-sm border border-white/50 flex items-center justify-between">
+          <div class="flex items-center">
+            <input 
+              type="checkbox" 
+              [checked]="allItemsSelected"
+              [indeterminate]="someItemsSelected"
+              (change)="toggleAllItems($event)"
+              class="w-5 h-5 text-green-600 rounded focus:ring-green-500"
+            >
+            <label class="ml-3 text-gray-700 font-medium">Select All</label>
+          </div>
+          <button 
+            (click)="openClearCartModal()"
+            class="text-red-500 hover:text-red-700 text-sm flex items-center"
+          >
+            <span class="material-icons text-sm mr-1">delete_sweep</span>
+            Clear Cart
+          </button>
         </div>
-        <button (click)="error = null" class="text-red-500 hover:text-red-700">
-          <span class="material-icons">close</span>
-        </button>
-      </div>
-  
-      <!-- Empty Cart State -->
-      <div *ngIf="cartItems.length === 0" class="text-center py-20">
-        <span class="material-icons text-6xl text-gray-400 mb-4">shopping_cart</span>
-        <h3 class="text-xl font-semibold text-gray-700 mb-2">Your cart is empty</h3>
-        <p class="text-gray-500 mb-6">Looks like you haven't added any items to your cart yet</p>
-        <button 
-          (click)="continueShopping()"
-          class="px-8 py-3 bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-full font-semibold hover:from-blue-500 hover:to-green-400 transition transform hover:scale-105"
-        >
-          Start Shopping
-        </button>
-      </div>
-  
-      <!-- Cart Items -->
-      <div *ngIf="cartItems.length > 0" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Cart Items List -->
-        <div class="lg:col-span-2 space-y-4">
-          <!-- Select All Bar -->
-          <div class="bg-white/80 backdrop-blur-md rounded-xl p-4 shadow-sm border border-white/50 flex items-center justify-between">
-            <div class="flex items-center">
+
+        <!-- Cart Items -->
+        <div *ngFor="let item of cartItems" 
+             class="bg-white/80 backdrop-blur-md rounded-xl shadow-sm border border-white/50 overflow-hidden hover:shadow-md transition">
+          <div class="p-4 flex flex-col sm:flex-row gap-4">
+            <!-- Checkbox -->
+            <div class="flex items-center sm:items-start">
               <input 
                 type="checkbox" 
-                [checked]="allItemsSelected"
-                [indeterminate]="someItemsSelected"
-                (change)="toggleAllItems($event)"
+                [checked]="item.selected"
+                (change)="toggleItemSelection(item, $event)"
                 class="w-5 h-5 text-green-600 rounded focus:ring-green-500"
               >
-              <label class="ml-3 text-gray-700 font-medium">Select All</label>
             </div>
-            <button 
-              (click)="clearCart()"
-              class="text-red-500 hover:text-red-700 text-sm flex items-center"
-            >
-              <span class="material-icons text-sm mr-1">delete_sweep</span>
-              Clear Cart
-            </button>
-          </div>
-  
-          <!-- Cart Items -->
-          <div *ngFor="let item of cartItems" class="bg-white/80 backdrop-blur-md rounded-xl shadow-sm border border-white/50 overflow-hidden hover:shadow-md transition">
-            <div class="p-4 flex flex-col sm:flex-row gap-4">
-              <!-- Checkbox -->
-              <div class="flex items-center sm:items-start">
-                <input 
-                  type="checkbox" 
-                  [checked]="item.selected"
-                  (change)="toggleItemSelection(item, $event)"
-                  class="w-5 h-5 text-green-600 rounded focus:ring-green-500"
+
+            <!-- Product Image -->
+            <div class="flex-shrink-0">
+              <div class="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                <img 
+                  [src]="item.product.imageUrl || 'assets/images/default-product.jpg'"
+                  [alt]="item.product.name"
+                  class="w-full h-full object-cover"
+                  (error)="handleImageError($event)"
                 >
               </div>
-  
-              <!-- Product Image -->
-              <div class="flex-shrink-0">
-                <div class="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-                  <img 
-                    [src]="item.product.imageUrl || 'assets/images/default-product.jpg'"
-                    [alt]="item.product.name"
-                    class="w-full h-full object-cover"
-                    (error)="handleImageError($event)"
-                  >
+            </div>
+
+            <!-- Product Details -->
+            <div class="flex-1">
+              <div class="flex justify-between">
+                <h3 class="text-lg font-semibold text-gray-800">{{ item.product.name }}</h3>
+                <button 
+                  (click)="openRemoveModal(item)"
+                  class="text-gray-400 hover:text-red-500 transition"
+                  title="Remove item"
+                >
+                  <span class="material-icons">close</span>
+                </button>
+              </div>
+
+              <p class="text-sm text-gray-600 mb-2 line-clamp-1">{{ item.product.description }}</p>
+
+              <div class="flex items-center text-sm text-gray-500 mb-2">
+                <span class="material-icons text-xs mr-1">person</span>
+                {{ item.product.farmer.name }}
+              </div>
+
+              <div class="flex flex-wrap items-center justify-between gap-4">
+                <!-- Price -->
+                <div>
+                  <span class="text-lg font-bold text-green-600">{{ formatPrice(item.product.price) }}</span>
+                  <span class="text-sm text-gray-500 ml-1">each</span>
+                </div>
+
+                <!-- Quantity Controls -->
+                <div class="flex items-center">
+                  <span class="text-sm text-gray-600 mr-2">Qty:</span>
+                  <div class="flex items-center border rounded-lg overflow-hidden">
+                    <button 
+                      (click)="updateQuantity(item, item.quantity - 1)"
+                      [disabled]="item.quantity <= 1"
+                      class="px-3 py-1 bg-gray-100 hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span class="material-icons text-sm">remove</span>
+                    </button>
+                    <input 
+                      type="number" 
+                      [value]="item.quantity"
+                      (change)="updateQuantity(item, $any($event.target).value)"
+                      min="1"
+                      [max]="item.product.quantity"
+                      class="w-16 text-center py-1 border-x focus:outline-none"
+                    >
+                    <button 
+                      (click)="updateQuantity(item, item.quantity + 1)"
+                      [disabled]="item.quantity >= item.product.quantity"
+                      class="px-3 py-1 bg-gray-100 hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span class="material-icons text-sm">add</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Item Total -->
+                <div class="text-right">
+                  <span class="text-sm text-gray-500">Total:</span>
+                  <span class="ml-2 font-semibold text-gray-800">{{ formatPrice(item.product.price * item.quantity) }}</span>
                 </div>
               </div>
-  
-              <!-- Product Details -->
-              <div class="flex-1">
-                <div class="flex justify-between">
-                  <h3 class="text-lg font-semibold text-gray-800">{{ item.product.name }}</h3>
-                  <button 
-                    (click)="removeItem(item.product.id)"
-                    class="text-gray-400 hover:text-red-500 transition"
-                    title="Remove item"
-                  >
-                    <span class="material-icons">close</span>
-                  </button>
-                </div>
-  
-                <p class="text-sm text-gray-600 mb-2 line-clamp-1">{{ item.product.description }}</p>
-  
-                <div class="flex items-center text-sm text-gray-500 mb-2">
-                  <span class="material-icons text-xs mr-1">person</span>
-                  {{ item.product.farmer.name }}
-                </div>
-  
-                <div class="flex flex-wrap items-center justify-between gap-4">
-                  <!-- Price -->
-                  <div>
-                    <span class="text-lg font-bold text-green-600">{{ formatPrice(item.product.price) }}</span>
-                    <span class="text-sm text-gray-500 ml-1">each</span>
-                  </div>
-  
-                  <!-- Quantity Controls -->
-                  <div class="flex items-center">
-                    <span class="text-sm text-gray-600 mr-2">Qty:</span>
-                    <div class="flex items-center border rounded-lg overflow-hidden">
-                      <button 
-                        (click)="updateQuantity(item, item.quantity - 1)"
-                        [disabled]="item.quantity <= 1"
-                        class="px-3 py-1 bg-gray-100 hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <span class="material-icons text-sm">remove</span>
-                      </button>
-                      <input 
-                        type="number" 
-                        [value]="item.quantity"
-                        (change)="updateQuantity(item, $any($event.target).value)"
-                        min="1"
-                        [max]="item.product.quantity"
-                        class="w-16 text-center py-1 border-x focus:outline-none"
-                      >
-                      <button 
-                        (click)="updateQuantity(item, item.quantity + 1)"
-                        [disabled]="item.quantity >= item.product.quantity"
-                        class="px-3 py-1 bg-gray-100 hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <span class="material-icons text-sm">add</span>
-                      </button>
-                    </div>
-                  </div>
-  
-                  <!-- Item Total -->
-                  <div class="text-right">
-                    <span class="text-sm text-gray-500">Total:</span>
-                    <span class="ml-2 font-semibold text-gray-800">{{ formatPrice(item.product.price * item.quantity) }}</span>
-                  </div>
-                </div>
-  
-                <!-- Stock Warning -->
-                <div *ngIf="item.quantity > item.product.quantity" class="mt-2 text-sm text-red-600 flex items-center">
-                  <span class="material-icons text-sm mr-1">warning</span>
-                  Only {{ item.product.quantity }} available
-                </div>
+
+              <!-- Stock Warning -->
+              <div *ngIf="item.quantity > item.product.quantity" 
+                   class="mt-2 text-sm text-red-600 flex items-center">
+                <span class="material-icons text-sm mr-1">warning</span>
+                Only {{ item.product.quantity }} available
               </div>
             </div>
           </div>
         </div>
-  
-        <!-- Order Summary -->
-        <div class="lg:col-span-1">
-          <div class="bg-white/80 backdrop-blur-md rounded-xl shadow-lg border border-white/50 p-6 sticky top-4">
-            <h3 class="text-xl font-bold text-gray-800 mb-6">Order Summary</h3>
-  
-            <div class="space-y-4 mb-6">
-              <div class="flex justify-between text-gray-600">
-                <span>Selected Items ({{ summary.selectedItems }})</span>
-                <span>{{ formatPrice(summary.selectedTotal) }}</span>
-              </div>
-              <div class="flex justify-between text-gray-600">
-                <span>Subtotal ({{ summary.totalItems }} items)</span>
-                <span>{{ formatPrice(summary.subtotal) }}</span>
-              </div>
-              <div class="flex justify-between text-gray-600">
-                <span>Delivery Fee</span>
-                <span class="text-green-600">Free</span>
-              </div>
-              <div class="border-t pt-4">
-                <div class="flex justify-between text-lg font-bold">
-                  <span>Total</span>
-                  <span class="text-green-600">{{ formatPrice(summary.selectedTotal) }}</span>
-                </div>
-                <p class="text-xs text-gray-500 mt-1">Inclusive of all taxes</p>
-              </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="lg:col-span-1">
+        <div class="bg-white/80 backdrop-blur-md rounded-xl shadow-lg border border-white/50 p-6 sticky top-4">
+          <h3 class="text-xl font-bold text-gray-800 mb-6">Order Summary</h3>
+
+          <div class="space-y-4 mb-6">
+            <div class="flex justify-between text-gray-600">
+              <span>Selected Items ({{ summary.selectedItems }})</span>
+              <span>{{ formatPrice(summary.selectedTotal) }}</span>
             </div>
-  
-            <!-- Place Order Button -->
-            <button 
-              (click)="placeOrder()"
-              [disabled]="summary.selectedItems === 0 || placingOrder"
-              class="w-full bg-gradient-to-r from-green-400 to-blue-500 hover:from-blue-500 hover:to-green-400 text-white py-4 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center space-x-2 mb-3"
-            >
-              <span *ngIf="!placingOrder" class="material-icons">shopping_cart_checkout</span>
-              <span *ngIf="!placingOrder">Place Order</span>
-              <span *ngIf="placingOrder" class="flex items-center">
-                <span class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></span>
-                Processing...
-              </span>
-            </button>
-  
-            <!-- View Orders Button -->
-            <button 
-              (click)="viewOrders()"
-              class="w-full bg-white border-2 border-green-500 text-green-600 py-3 rounded-xl font-semibold hover:bg-green-50 transition flex items-center justify-center space-x-2"
-            >
-              <span class="material-icons">receipt</span>
-              <span>View My Orders</span>
-            </button>
-  
-            <!-- Payment Methods -->
-            <div class="mt-6 pt-6 border-t">
-              <p class="text-sm text-gray-500 text-center mb-3">We accept</p>
-              <div class="flex justify-center space-x-4">
-                <span class="material-icons text-gray-400">payment</span>
-                <span class="material-icons text-gray-400">credit_card</span>
-                <span class="material-icons text-gray-400">account_balance</span>
-                <span class="material-icons text-gray-400">phone_iphone</span>
+            <div class="flex justify-between text-gray-600">
+              <span>Subtotal ({{ summary.totalItems }} items)</span>
+              <span>{{ formatPrice(summary.subtotal) }}</span>
+            </div>
+            <div class="flex justify-between text-gray-600">
+              <span>Delivery Fee</span>
+              <span class="text-green-600">Free</span>
+            </div>
+            <div class="border-t pt-4">
+              <div class="flex justify-between text-lg font-bold">
+                <span>Total</span>
+                <span class="text-green-600">{{ formatPrice(summary.selectedTotal) }}</span>
               </div>
+              <p class="text-xs text-gray-500 mt-1">Inclusive of all taxes</p>
+            </div>
+          </div>
+
+          <!-- Place Order Button -->
+          <button 
+            (click)="placeOrder()"
+            [disabled]="summary.selectedItems === 0 || placingOrder"
+            class="w-full bg-gradient-to-r from-green-400 to-blue-500 hover:from-blue-500 hover:to-green-400 text-white py-4 rounded-xl font-semibold shadow-lg transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center space-x-2 mb-3"
+          >
+            <span *ngIf="!placingOrder" class="material-icons">shopping_cart_checkout</span>
+            <span *ngIf="!placingOrder">Place Order</span>
+            <span *ngIf="placingOrder" class="flex items-center">
+              <span class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></span>
+              Processing...
+            </span>
+          </button>
+
+          <!-- View Orders Button -->
+          <button 
+            
+            (click)="viewOrders()"
+            class="w-full bg-white border-2 border-green-500 text-green-600 py-3 rounded-xl font-semibold hover:bg-green-50 transition flex items-center justify-center space-x-2"
+          >
+            <span class="material-icons">receipt</span>
+            <span>View My Orders</span>
+          </button>
+
+          <!-- Payment Methods -->
+          <div class="mt-6 pt-6 border-t">
+            <p class="text-sm text-gray-500 text-center mb-3">We accept</p>
+            <div class="flex justify-center space-x-4">
+              <span class="material-icons text-gray-400">payment</span>
+              <span class="material-icons text-gray-400">credit_card</span>
+              <span class="material-icons text-gray-400">account_balance</span>
+              <span class="material-icons text-gray-400">phone_iphone</span>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  
+</div>
+
+<!-- Remove Item Modal -->
+<div *ngIf="showRemoveModal && itemToRemove"
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+  (click)="closeRemoveModal()">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-slide-up" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="bg-gradient-to-r from-red-500 to-pink-500 text-white p-6 rounded-t-2xl">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <span class="material-icons text-2xl">delete</span>
+          <h3 class="text-xl font-bold">Remove Item</h3>
+        </div>
+        <button (click)="closeRemoveModal()" class="hover:bg-white/20 rounded-full p-1 transition">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-6">
+      <div class="text-center mb-6">
+        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+          <span class="material-icons text-red-600 text-3xl">delete_forever</span>
+        </div>
+        <p class="text-gray-700 mb-2">
+          Are you sure you want to remove
+          <span class="font-semibold text-gray-900">"{{ itemToRemove.product.name }}"</span>?
+        </p>
+        <p class="text-sm text-gray-500">
+          This action cannot be undone.
+        </p>
+      </div>
+
+      <!-- Product Preview -->
+      <div class="bg-gray-50 rounded-xl p-4 mb-6 flex items-center gap-3">
+        <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-200">
+          <img [src]="itemToRemove.product.imageUrl || 'assets/images/default-product.jpg'" 
+               [alt]="itemToRemove.product.name"
+               class="w-full h-full object-cover">
+        </div>
+        <div>
+          <p class="font-medium text-gray-800">{{ itemToRemove.product.name }}</p>
+          <p class="text-sm text-gray-500">Quantity: {{ itemToRemove.quantity }}</p>
+          <p class="text-sm text-green-600 font-medium">{{ formatPrice(itemToRemove.product.price * itemToRemove.quantity) }}</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex space-x-3">
+        <button
+          (click)="closeRemoveModal()"
+          class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition font-medium"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="confirmRemove()"
+          class="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl font-medium shadow-lg transition flex items-center justify-center"
+        >
+          <span class="material-icons text-sm mr-1">delete</span>
+          Remove
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Clear Cart Modal -->
+<div *ngIf="showClearCartModal"
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+  (click)="closeClearCartModal()">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-slide-up" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="bg-gradient-to-r from-red-500 to-pink-500 text-white p-6 rounded-t-2xl">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <span class="material-icons text-2xl">delete_sweep</span>
+          <h3 class="text-xl font-bold">Clear Cart</h3>
+        </div>
+        <button (click)="closeClearCartModal()" class="hover:bg-white/20 rounded-full p-1 transition">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-6">
+      <div class="text-center mb-6">
+        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+          <span class="material-icons text-red-600 text-3xl">remove_shopping_cart</span>
+        </div>
+        <p class="text-gray-700 mb-2">
+          Are you sure you want to clear your entire cart?
+        </p>
+        <p class="text-sm text-gray-500">
+          You have <span class="font-semibold">{{ cartItems.length }} items</span> in your cart. This action cannot be undone.
+        </p>
+      </div>
+
+      <!-- Cart Summary -->
+      <div class="bg-gray-50 rounded-xl p-4 mb-6">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">Total Items:</span>
+          <span class="font-medium">{{ summary.totalItems }}</span>
+        </div>
+        <div class="flex justify-between text-sm mt-2">
+          <span class="text-gray-600">Subtotal:</span>
+          <span class="font-medium text-green-600">{{ formatPrice(summary.subtotal) }}</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex space-x-3">
+        <button
+          (click)="closeClearCartModal()"
+          class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition font-medium"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="confirmClearCart()"
+          class="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl font-medium shadow-lg transition flex items-center justify-center"
+        >
+          <span class="material-icons text-sm mr-1">delete_sweep</span>
+          Clear Cart
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

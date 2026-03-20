@@ -6,11 +6,12 @@ import { AuthService } from '../../service/auth.service';
 import { Subscription } from 'rxjs';
 import { Product } from '../../interfaces';
 import { CartService } from '../../service/cart.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.css']
 })
@@ -18,10 +19,16 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   product: Product | null = null;
   loading = true;
   error: string | null = null;
+  successMessage: string | null = null;
   selectedImageIndex = 0;
   quantity = 1;
   relatedProducts: Product[] = [];
-  productId: string | null = null; // Changed from private to public
+  productId: string | null = null;
+  
+  // Modal states
+  showContactModal = false;
+  contactMessage: string = '';
+  sendingMessage = false;
   
   private subscriptions: Subscription = new Subscription();
 
@@ -55,7 +62,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       next: (product) => {
         this.product = product;
         this.loading = false;
-        // Load related products after getting the current product
         if (product.category) {
           this.loadRelatedProducts(product.category, product.id);
         }
@@ -73,7 +79,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   loadRelatedProducts(category: string, currentProductId: string): void {
     const relatedSub = this.productService.getAllProducts().subscribe({
       next: (products) => {
-        // Filter products by same category and exclude current product, limit to 4
         this.relatedProducts = products
           .filter(p => p.category === category && p.id !== currentProductId)
           .slice(0, 4);
@@ -110,24 +115,59 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       this.cartService.addToCart(this.product, this.quantity);
       
       // Show success message
-      alert(`${this.quantity} x ${this.product.name} added to cart!`);
+      this.successMessage = `✅ ${this.quantity} x ${this.product.name} added to cart!`;
       
-      // Optionally navigate to cart
-      // this.router.navigate(['/cart']);
+      // Auto-hide after 3 seconds
+      setTimeout(() => {
+        this.successMessage = null;
+      }, 3000);
     }
   }
 
-  contactFarmer(): void {
+  // Contact farmer modal methods
+  openContactModal(): void {
     if (!this.isLoggedIn()) {
       this.router.navigate(['/login'], { 
         queryParams: { returnUrl: `/product/${this.productId}` } 
       });
       return;
     }
+    this.contactMessage = '';
+    this.showContactModal = true;
+  }
 
-    // TODO: Implement messaging or redirect to farmer profile
-    console.log('Contacting farmer:', this.product?.farmer);
-    alert(`Contact farmer: ${this.product?.farmer.email}`);
+  closeContactModal(): void {
+    this.showContactModal = false;
+    this.contactMessage = '';
+    this.sendingMessage = false;
+  }
+
+  sendMessage(): void {
+    if (!this.contactMessage.trim()) {
+      this.error = 'Please enter a message';
+      setTimeout(() => this.error = null, 3000);
+      return;
+    }
+
+    this.sendingMessage = true;
+
+    // Simulate sending message (replace with actual API call)
+    setTimeout(() => {
+      console.log('Message to farmer:', {
+        farmerId: this.product?.farmer.id,
+        farmerEmail: this.product?.farmer.email,
+        message: this.contactMessage,
+        product: this.product?.name
+      });
+      
+      this.successMessage = `✅ Message sent to ${this.product?.farmer.name}`;
+      this.closeContactModal();
+      this.sendingMessage = false;
+
+      setTimeout(() => {
+        this.successMessage = null;
+      }, 3000);
+    }, 1500);
   }
 
   goBack(): void {
@@ -186,7 +226,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     return 'bg-red-500';
   }
 
-  // Helper method to get the product ID for template
   getCurrentProductId(): string | null {
     return this.productId;
   }

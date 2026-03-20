@@ -143,3 +143,71 @@ export interface CartSummary {
   selectedItems: number;
   selectedTotal: number;
 }
+
+export interface FarmerStats {
+  totalProducts: number;
+  totalOrders: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+  pendingOrders: number;
+  shippedOrders: number;
+  deliveredOrders: number;
+  cancelledOrders: number;
+  lowStockProducts: number;
+  outOfStockProducts: number;
+}
+
+export interface ProductSalesData {
+  productId: string;
+  productName: string;
+  totalSold: number;
+  revenue: number;
+  imageUrl: string;
+}
+
+export interface DailySalesData {
+  date: string;
+  orders: number;
+  revenue: number;
+}
+
+export interface MonthlySalesData {
+  month: string;
+  orders: number;
+  revenue: number;
+}
+
+export interface TopProduct extends Product {
+  totalSold: number;
+  revenue: number;
+}
+
+export interface FarmerDashboardData {
+  stats: FarmerStats;
+  recentOrders: Order[];
+  topProducts: TopProduct[];
+  salesTrend: DailySalesData[];
+  monthlyTrend: MonthlySalesData[];
+  products: Product[];
+}
+
+export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+
+// Then update your User interface
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: UserStatus;
+  phone?: string;
+  isVerified?: boolean;
+  createdAt?: string;
+  profile?: {
+    profileImage?: string;
+    institution?: {
+      id: string;
+      name: string;
+    };
+  };
+}

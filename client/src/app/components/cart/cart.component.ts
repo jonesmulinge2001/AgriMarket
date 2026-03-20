@@ -29,6 +29,11 @@ export class CartComponent implements OnInit, OnDestroy {
   error: string | null = null;
   successMessage: string | null = null;
   
+  // Modal states
+  showRemoveModal = false;
+  itemToRemove: CartItem | null = null;
+  showClearCartModal = false;
+  
   private subscriptions: Subscription = new Subscription();
 
   constructor(
@@ -76,12 +81,52 @@ export class CartComponent implements OnInit, OnDestroy {
     }
     
     this.cartService.updateQuantity(item.product.id, newQuantity);
+    this.successMessage = `Quantity updated to ${newQuantity}`;
+    setTimeout(() => this.successMessage = null, 2000);
   }
 
-  removeItem(productId: string): void {
-    if (confirm('Are you sure you want to remove this item from your cart?')) {
-      this.cartService.removeFromCart(productId);
+  // Remove item modal methods
+  openRemoveModal(item: CartItem): void {
+    this.itemToRemove = item;
+    this.showRemoveModal = true;
+  }
+
+  closeRemoveModal(): void {
+    this.showRemoveModal = false;
+    this.itemToRemove = null;
+  }
+
+  confirmRemove(): void {
+    if (this.itemToRemove) {
+      this.cartService.removeFromCart(this.itemToRemove.product.id);
+      this.successMessage = `"${this.itemToRemove.product.name}" removed from cart`;
+      this.closeRemoveModal();
+      
+      setTimeout(() => {
+        this.successMessage = null;
+      }, 3000);
     }
+  }
+
+  // Clear cart modal methods
+  openClearCartModal(): void {
+    if (this.cartItems.length > 0) {
+      this.showClearCartModal = true;
+    }
+  }
+
+  closeClearCartModal(): void {
+    this.showClearCartModal = false;
+  }
+
+  confirmClearCart(): void {
+    this.cartService.clearCart();
+    this.successMessage = 'Cart cleared successfully';
+    this.closeClearCartModal();
+    
+    setTimeout(() => {
+      this.successMessage = null;
+    }, 3000);
   }
 
   toggleItemSelection(item: CartItem, event: any): void {
@@ -90,12 +135,6 @@ export class CartComponent implements OnInit, OnDestroy {
 
   toggleAllItems(event: any): void {
     this.cartService.toggleAllItems(event.target.checked);
-  }
-
-  clearCart(): void {
-    if (confirm('Are you sure you want to clear your entire cart?')) {
-      this.cartService.clearCart();
-    }
   }
 
   get allItemsSelected(): boolean {
@@ -111,47 +150,60 @@ export class CartComponent implements OnInit, OnDestroy {
     const selectedItems = this.cartService.getSelectedItems();
     
     if (selectedItems.length === 0) {
-      this.error = 'Please select at least one item to order';
+      this.error = '⚠️ Please select at least one item to order';
+      setTimeout(() => this.error = null, 3000);
       return;
     }
-
+  
     // Validate stock availability
     for (const item of selectedItems) {
       if (item.quantity > item.product.quantity) {
-        this.error = `Insufficient stock for ${item.product.name}. Only ${item.product.quantity} available.`;
+        this.error = `⚠️ Insufficient stock for ${item.product.name}. Only ${item.product.quantity} available.`;
+        setTimeout(() => this.error = null, 5000);
         return;
       }
     }
-
+  
     this.placingOrder = true;
     this.error = null;
     this.successMessage = null;
-
+  
     try {
       const orders = selectedItems.map(item => ({
         productId: item.product.id,
-        quantity: item.quantity
+        quantity: Number(item.quantity) // Ensure it's a number
       }));
-
+  
+      console.log('📦 Placing orders:', JSON.stringify(orders, null, 2));
+  
       // Create orders one by one
       for (const order of orders) {
-        await this.orderService.createOrder(order).toPromise();
+        try {
+          console.log('📤 Sending order:', order);
+          const result = await this.orderService.createOrder(order).toPromise();
+          console.log('✅ Order placed successfully:', result);
+        } catch (orderError: any) {
+          console.error('❌ Failed to place order:', orderError);
+          const productName = selectedItems.find(i => i.product.id === order.productId)?.product.name;
+          throw new Error(`Failed to order ${productName}: ${orderError.message}`);
+        }
       }
-
+  
       // Remove ordered items from cart
       selectedItems.forEach(item => {
         this.cartService.removeFromCart(item.product.id);
       });
-
-      this.successMessage = 'Order placed successfully!';
+  
+      this.successMessage = '✅ Order placed successfully!';
       
-      // Clear success message after 5 seconds
       setTimeout(() => {
         this.successMessage = null;
       }, 5000);
-
+  
     } catch (error: any) {
-      this.error = error.message || 'Failed to place order. Please try again.';
+      console.error('❌ Error placing orders:', error);
+      this.error = error.message || '❌ Failed to place order. Please try again.';
+      setTimeout(() => this.error = null, 5000);
     } finally {
       this.placingOrder = false;
     }
@@ -162,7 +214,7 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   viewOrders(): void {
-    this.router.navigate(['/orders']);
+    this.router.navigate(['/my-orders']);
   }
 
   formatPrice(price: number): string {

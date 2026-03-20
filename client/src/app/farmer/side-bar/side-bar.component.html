@@ -1,0 +1,254 @@
+<!-- Sidebar -->
+<aside
+  class="fixed left-0 top-0 h-full transition-all duration-300 shadow-2xl z-40 flex flex-col backdrop-blur-md"
+  [ngClass]="[
+    isCollapsed ? 'w-16' : 'w-64',
+    isDarkMode 
+      ? 'bg-gray-900/90 text-white border-r border-gray-800' 
+      : 'bg-white/80 text-gray-800 border-r border-white/20'
+  ]"
+>
+
+  <!-- Logo Section with Gradient -->
+  <div class="relative overflow-hidden">
+    <!-- Decorative Gradient Background -->
+    <div class="absolute inset-0 bg-gradient-to-r from-green-400/10 to-blue-500/10"></div>
+    
+    <div class="relative p-4 border-b" [ngClass]="isDarkMode ? 'border-gray-800' : 'border-white/20'">
+      <div class="flex items-center gap-3">
+        <!-- Logo Icon with Gradient -->
+        <div class="bg-gradient-to-r from-green-400 to-blue-500 rounded-xl w-10 h-10 flex items-center justify-center text-white shadow-lg transform transition-transform hover:scale-105">
+          <span class="material-icons text-2xl">agriculture</span>
+        </div>
+        
+        <!-- Brand Text with Gradient -->
+        <span *ngIf="!isCollapsed" class="font-bold text-lg bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+          Farmer Panel
+        </span>
+      </div>
+      
+      <!-- Decorative Line -->
+      <div *ngIf="!isCollapsed" class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-gradient-to-r from-green-400 to-blue-500 rounded-full"></div>
+    </div>
+  </div>
+
+  <!-- Navigation with Glass Effect -->
+  <nav class="flex-1 p-3 space-y-1 overflow-y-auto scrollbar-thin" 
+       [ngClass]="isDarkMode ? 'scrollbar-gray-700' : 'scrollbar-gray-200'">
+    
+    <!-- Overview -->
+    <a
+      href="javascript:void(0)"
+      (click)="setActiveTab('overview')"
+      class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer group relative overflow-hidden"
+      [ngClass]="[
+        activeTab === 'overview' 
+          ? 'bg-gradient-to-r from-green-400 to-blue-500 text-white shadow-lg' 
+          : (isDarkMode 
+              ? 'text-gray-300 hover:bg-gray-800/50 hover:text-white' 
+              : 'text-gray-600 hover:bg-white/50 hover:text-gray-900')
+      ]"
+    >
+      <!-- Active Tab Indicator -->
+      <span *ngIf="activeTab === 'overview'" 
+            class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-white rounded-r-full"></span>
+      
+      <span class="material-icons text-xl group-hover:scale-110 transition-transform">{{ isCollapsed ? 'dashboard' : 'dashboard' }}</span>
+      <span *ngIf="!isCollapsed" class="font-medium">Overview</span>
+      
+      <!-- Tooltip for Collapsed State -->
+      <span *ngIf="isCollapsed" 
+            class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+        Overview
+      </span>
+    </a>
+
+    <!-- Products -->
+    <a
+      href="javascript:void(0)"
+      (click)="setActiveTab('products')"
+      class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer group relative overflow-hidden"
+      [ngClass]="[
+        activeTab === 'products' 
+          ? 'bg-gradient-to-r from-green-400 to-blue-500 text-white shadow-lg' 
+          : (isDarkMode 
+              ? 'text-gray-300 hover:bg-gray-800/50 hover:text-white' 
+              : 'text-gray-600 hover:bg-white/50 hover:text-gray-900')
+      ]"
+    >
+      <span *ngIf="activeTab === 'products'" 
+            class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-white rounded-r-full"></span>
+      
+      <span class="material-icons text-xl group-hover:scale-110 transition-transform">inventory</span>
+      <span *ngIf="!isCollapsed" class="font-medium">Products</span>
+      
+      <span *ngIf="isCollapsed" 
+            class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+        Products
+      </span>
+    </a>
+
+    <!-- Orders -->
+    <a
+      href="javascript:void(0)"
+      (click)="setActiveTab('orders')"
+      class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer group relative overflow-hidden"
+      [ngClass]="[
+        activeTab === 'orders' 
+          ? 'bg-gradient-to-r from-green-400 to-blue-500 text-white shadow-lg' 
+          : (isDarkMode 
+              ? 'text-gray-300 hover:bg-gray-800/50 hover:text-white' 
+              : 'text-gray-600 hover:bg-white/50 hover:text-gray-900')
+      ]"
+    >
+      <span *ngIf="activeTab === 'orders'" 
+            class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-white rounded-r-full"></span>
+      
+      <span class="material-icons text-xl group-hover:scale-110 transition-transform">shopping_cart</span>
+      <span *ngIf="!isCollapsed" class="font-medium">Orders</span>
+      
+      <span *ngIf="isCollapsed" 
+            class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+        Orders
+      </span>
+    </a>
+
+    <!-- Analytics -->
+    <a
+      href="javascript:void(0)"
+      (click)="setActiveTab('analytics')"
+      class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer group relative overflow-hidden"
+      [ngClass]="[
+        activeTab === 'analytics' 
+          ? 'bg-gradient-to-r from-green-400 to-blue-500 text-white shadow-lg' 
+          : (isDarkMode 
+              ? 'text-gray-300 hover:bg-gray-800/50 hover:text-white' 
+              : 'text-gray-600 hover:bg-white/50 hover:text-gray-900')
+      ]"
+    >
+      <span *ngIf="activeTab === 'analytics'" 
+            class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-white rounded-r-full"></span>
+      
+      <span class="material-icons text-xl group-hover:scale-110 transition-transform">analytics</span>
+      <span *ngIf="!isCollapsed" class="font-medium">Analytics</span>
+      
+      <span *ngIf="isCollapsed" 
+            class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+        Analytics
+      </span>
+    </a>
+  </nav>
+
+  <!-- User Section & Logout -->
+  <div class="p-3 border-t" [ngClass]="isDarkMode ? 'border-gray-800' : 'border-white/20'">
+    
+    <!-- User Info (when expanded) -->
+    <div *ngIf="!isCollapsed" class="mb-3 p-3 rounded-xl bg-gradient-to-r from-green-400/10 to-blue-500/10 backdrop-blur-sm">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white text-sm font-bold">
+          F
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium truncate">Farmer User</p>
+          <p class="text-xs text-gray-500 truncate">farmer&#64;example.com</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout Button -->
+    <button
+      (click)="openLogoutModal()"
+      class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer group relative overflow-hidden"
+      [ngClass]="[
+        isDarkMode 
+          ? 'text-gray-300 hover:bg-red-500/10 hover:text-red-400' 
+          : 'text-gray-600 hover:bg-red-50 hover:text-red-600'
+      ]"
+    >
+      <span class="material-icons text-xl group-hover:scale-110 transition-transform">logout</span>
+      <span *ngIf="!isCollapsed" class="font-medium">Logout</span>
+      
+      <!-- Tooltip for Collapsed State -->
+      <span *ngIf="isCollapsed" 
+            class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+        Logout
+      </span>
+    </button>
+  </div>
+</aside>
+
+<!-- Logout Confirmation Modal -->
+<div *ngIf="showLogoutModal" 
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+  (click)="closeLogoutModal()">
+  
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-slide-up" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header with Gradient -->
+    <div class="bg-gradient-to-r from-red-500 to-pink-500 text-white p-6 rounded-t-2xl relative overflow-hidden">
+      <div class="absolute inset-0 bg-white/10 transform -skew-y-12"></div>
+      <div class="relative flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <div class="bg-white/20 rounded-full p-2 backdrop-blur-sm">
+            <span class="material-icons text-2xl">logout</span>
+          </div>
+          <h3 class="text-xl font-bold">Confirm Logout</h3>
+        </div>
+        <button 
+          (click)="closeLogoutModal()" 
+          class="hover:bg-white/20 rounded-full p-1 transition"
+        >
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-6">
+      <!-- Warning Icon -->
+      <div class="text-center mb-6">
+        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-50 mb-4">
+          <span class="material-icons text-red-500 text-4xl">logout</span>
+        </div>
+        <p class="text-gray-700 text-lg mb-2">
+          Ready to leave?
+        </p>
+        <p class="text-sm text-gray-500">
+          You will be logged out of your account and redirected to the login page.
+        </p>
+      </div>
+
+      <!-- User Info Summary -->
+      <div class="bg-gray-50 rounded-xl p-4 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white font-bold">
+            F
+          </div>
+          <div>
+            <p class="font-medium text-gray-800">Farmer User</p>
+            <p class="text-sm text-gray-500">farmer&#64;example.com</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex space-x-3">
+        <button
+          type="button"
+          (click)="closeLogoutModal()"
+          class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition font-medium"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="confirmLogout()"
+          class="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl font-medium shadow-lg transition flex items-center justify-center group"
+        >
+          <span class="material-icons text-sm mr-1 group-hover:translate-x-1 transition-transform">logout</span>
+          Yes, Logout
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
