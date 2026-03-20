@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { Order, PrismaClient } from 'generated/prisma/client';  // Fix: import from @prisma/client
+import { Order, OrderStatus, PrismaClient } from 'generated/prisma/client';  // Fix: import from @prisma/client
 import { CreateOrderDto } from 'src/dto/create-order';
 import { UpdateOrderDto } from 'src/dto/update-order';
 
@@ -69,7 +69,7 @@ export class OrdersService {
         buyer: true  // Fix: use 'buyer' instead of 'user'
       },
     });
-  }
+  } 
 
   async update(id: string, dto: UpdateOrderDto): Promise<Order> {
     const order = await this.prisma.order.findUnique({ 
@@ -178,4 +178,27 @@ export class OrdersService {
       }
     });
   }
+
+
+  async updateStatus(id: string, status: OrderStatus): Promise<Order> {
+    const order = await this.prisma.order.findUnique({ 
+      where: { id },
+      include: { items: true }
+    });
+    
+    if (!order) throw new NotFoundException('Order not found');
+    
+    // Only update status, don't touch quantity or stock
+    return this.prisma.order.update({
+      where: { id },
+      data: { status },
+      include: {
+        items: {
+          include: { product: true }
+        },
+        buyer: true
+      }
+    });
+  }
+
 }

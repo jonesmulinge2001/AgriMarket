@@ -9,9 +9,10 @@ import { MailerModule } from './shared/mailer/mailer.module';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [CloudinaryModule, PermissionModule, JwtModule, MailerModule, AuthModule, ProductsModule, OrdersModule],
+  imports: [CloudinaryModule, PermissionModule, JwtModule, MailerModule, AuthModule, ProductsModule, OrdersModule, UsersModule],
   controllers: [AppController],
   providers: [AppService],
 })

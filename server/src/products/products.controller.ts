@@ -37,7 +37,7 @@ export class ProductsController {
   async create(
     @Body() dto: CreateProductDto,
     @Req() req: RequestWithUser,
-    @UploadedFile() file?: Express.Multer.File, // Make file optional with ?
+    @UploadedFile() file?: Express.Multer.File,
   ) {
     // If file is uploaded, use it
     if (file) {

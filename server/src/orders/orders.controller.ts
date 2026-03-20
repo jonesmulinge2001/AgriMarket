@@ -2,11 +2,24 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { Controller, Post, Get, Patch, Delete, Param, Body, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+  Req,
+  ForbiddenException,
+} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from 'src/dto/create-order';
 import { UpdateOrderDto } from 'src/dto/update-order';
 import { JwtAuthGuard } from 'src/guards/jwt/jwtAuth.guard';
+import { OrderStatus } from 'generated/prisma/enums';
+import { RequestWithUser } from 'src/interfaces/requestWithUser';
 
 @Controller('orders')
 export class OrdersController {
@@ -34,6 +47,21 @@ export class OrdersController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateOrderDto) {
     return this.ordersService.update(id, dto);
+  }
+
+  @Patch(':id/status')
+  @UseGuards(JwtAuthGuard)
+  async updateStatus(
+    @Param('id') id: string,
+    @Body() statusDto: { status: OrderStatus },
+    @Req() req: RequestWithUser,
+  ) {
+    // Check if user is a farmer (optional)
+    if (req.user.role !== 'FARMER') {
+      throw new ForbiddenException('Only farmers can update order status');
+    }
+
+    return this.ordersService.updateStatus(id, statusDto.status);
   }
 
   @UseGuards(JwtAuthGuard)

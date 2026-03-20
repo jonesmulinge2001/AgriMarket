@@ -1,7 +1,11 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable prettier/prettier */
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaClient } from 'generated/prisma/client';  // Fix: import from @prisma/client
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaClient } from 'generated/prisma/client'; // Fix: import from @prisma/client
 import { CreateProductDto } from 'src/dto/create-product';
 import { UpdateProductDto } from 'src/dto/update-product';
 
@@ -11,41 +15,44 @@ export class ProductsService {
 
   private prisma = new PrismaClient();
 
-  async create(farmerId: string, dto: CreateProductDto) {  // Fix: Add farmerId parameter
+  async create(farmerId: string, dto: CreateProductDto) {
+    // Fix: Add farmerId parameter
     return this.prisma.product.create({
       data: {
         ...dto,
-        farmerId: farmerId  // Fix: Add farmer relation
+        farmerId: farmerId, // Fix: Add farmer relation
       },
     });
   }
 
   async findAll() {
     return this.prisma.product.findMany({
-      include: {  // Optional: include farmer info if needed
+      include: {
+        // Optional: include farmer info if needed
         farmer: {
           select: {
             id: true,
             name: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
   }
 
   async findOne(id: string) {
-    const product = await this.prisma.product.findUnique({ 
+    const product = await this.prisma.product.findUnique({
       where: { id },
-      include: {  // Optional: include farmer info
+      include: {
+        // Optional: include farmer info
         farmer: {
           select: {
             id: true,
             name: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
     if (!product) throw new NotFoundException('Product not found');
     return product;
@@ -53,27 +60,36 @@ export class ProductsService {
 
   async update(id: string, dto: UpdateProductDto) {
     await this.findOne(id); // Ensure it exists
-    return this.prisma.product.update({ 
-      where: { id }, 
-      data: dto  // dto now includes category field
+    return this.prisma.product.update({
+      where: { id },
+      data: dto, // dto now includes category field
     });
   }
 
   async remove(id: string) {
-    await this.findOne(id); // Ensure it exists
-    
-    // Optional: Check if product has any orders before deleting
-    const productWithOrders = await this.prisma.product.findUnique({
+    // First, check if the product has any order items
+    const product = await this.prisma.product.findUnique({
       where: { id },
-      include: { orders: true }
+      include: {
+        orders: true, // Include related order items
+      },
     });
-    
-    if (productWithOrders?.orders.length) {
-      // Handle case where product has orders - either prevent deletion or handle accordingly
-      // For now, we'll just delete (cascade should handle orderItems)
+
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
     }
-    
-    return this.prisma.product.delete({ where: { id } });
+
+    // If there are order items, don't allow deletion
+    if (product.orders && product.orders.length > 0) {
+      throw new BadRequestException(
+        `Cannot delete product with ID ${id} because it has ${product.orders.length} existing order(s). Please ensure no orders are associated with this product before deleting.`,
+      );
+    }
+
+    // If no order items, proceed with deletion
+    return this.prisma.product.delete({
+      where: { id },
+    });
   }
 
   // Optional: Add method to get products by farmer
@@ -85,10 +101,10 @@ export class ProductsService {
           select: {
             id: true,
             name: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
   }
 }
